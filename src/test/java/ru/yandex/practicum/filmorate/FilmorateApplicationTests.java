@@ -22,11 +22,8 @@ class FilmorateApplicationTests {
 		FilmController filmController = new FilmController();
 		String emptyName = "";
 		final ValidationException exception1 = assertThrows(ValidationException.class,
-				() -> filmController.createFilm(new Film(12
-						, emptyName
-						, "desc"
-						, LocalDate.of(2012, 12, 12)
-						, 12))
+				() -> filmController.createFilm(new Film(12, emptyName, "desc",
+						LocalDate.of(2012, 12, 12), 12))
 		);
 		LocalDate older = LocalDate.of(1895, 12, 28).minusDays(1);
 		final ValidationException exception2 = assertThrows(ValidationException.class,
