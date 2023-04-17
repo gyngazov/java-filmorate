@@ -16,31 +16,40 @@ class FilmorateApplicationTests {
 	@Test
 	void contextLoads() {
 	}
+
 	@Test
 	void shouldValidateNewFilmFields() {
 		FilmController filmController = new FilmController();
 		String emptyName = "";
 		final ValidationException exception1 = assertThrows(ValidationException.class,
-				() -> filmController.createFilm(new Film(
-						12, emptyName
-						, "desc", LocalDate.of(2012, 12, 12)
+				() -> filmController.createFilm(new Film(12
+						, emptyName
+						, "desc"
+						, LocalDate.of(2012, 12, 12)
 						, 12))
 		);
 		LocalDate older = LocalDate.of(1895, 12, 28).minusDays(1);
 		final ValidationException exception2 = assertThrows(ValidationException.class,
-				() -> filmController.createFilm(new Film(
-						12, "name", "desc", older, 12))
+				() -> filmController.createFilm(new Film(12
+						, "name"
+						, "desc"
+						, older
+						, 12))
 		);
 		String longDesc = "w".repeat(201);
 		final ValidationException exception3 = assertThrows(ValidationException.class,
-				() -> filmController.createFilm(new Film(
-						12, "name", longDesc, LocalDate.of(2012, 12, 12)
+				() -> filmController.createFilm(new Film(12
+						, "name"
+						, longDesc
+						, LocalDate.of(2012, 12, 12)
 						, 12))
 		);
 		int negativeDuration = -3;
 		final ValidationException exception4 = assertThrows(ValidationException.class,
-				() -> filmController.createFilm(new Film(
-						12, "name", "dfr", LocalDate.of(2012, 12, 12)
+				() -> filmController.createFilm(new Film(12
+						, "name"
+						, "dfr"
+						, LocalDate.of(2012, 12, 12)
 						, negativeDuration))
 		);
 		assertAll(
