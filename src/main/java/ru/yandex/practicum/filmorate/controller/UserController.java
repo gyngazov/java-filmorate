@@ -21,6 +21,7 @@ public class UserController {
         users = new HashMap<>();
         id = 0;
     }
+
     private int setId() {
         return ++id;
     }
