@@ -30,6 +30,7 @@ public class UserController {
         log.info("Запрошен текущий список пользователей: " + users);
         return users.values();
     }
+
     @PostMapping
     public User createUser(@RequestBody User user) throws ValidationException {
         validateUser(user);
@@ -39,6 +40,7 @@ public class UserController {
         log.info("Создан пользователь " + user);
         return user;
     }
+
     @PutMapping
     public User updateUser(@RequestBody User user) throws ValidationException {
         checkUserInBase(user);
@@ -70,6 +72,7 @@ public class UserController {
             }
         }
     }
+
     private void validateUser(User user) throws ValidationException {
         if (user.getBirthday() == null) {
             throw new ValidationException("Не задан день рождения.");

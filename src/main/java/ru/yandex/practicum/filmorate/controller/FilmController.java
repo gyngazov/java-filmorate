@@ -20,6 +20,7 @@ public class FilmController {
         films = new HashMap<>();
         id = 0;
     }
+
     private int setId() {
         return ++id;
     }
@@ -29,6 +30,7 @@ public class FilmController {
         log.info("Запрошен текущий список фильмов: " + films);
         return films.values();
     }
+
     @PostMapping
     public Film createFilm(@RequestBody Film film) throws ValidationException {
         validateFilm(film);
@@ -38,6 +40,7 @@ public class FilmController {
         log.info("Создан фильм " + film);
         return film;
     }
+
     @PutMapping
     public Film updateFilm(@RequestBody Film film) throws ValidationException {
         checkFilmInBase(film);
@@ -54,6 +57,7 @@ public class FilmController {
             throw new ValidationException("Фильм с id " + film.getId() + "не найден.");
         }
     }
+
     private void findFilm(Film film) throws ValidationException {
         for (Film f: films.values()) {
             if (f.equals(film)) {
@@ -61,6 +65,7 @@ public class FilmController {
             }
         }
     }
+
     private void validateFilm(Film film) throws ValidationException {
         if (film.getReleaseDate() == null) {
             throw new ValidationException("Не задана дата фильма.");
