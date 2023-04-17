@@ -28,13 +28,12 @@ class FilmorateApplicationTests {
 		final ValidationException exception2 = assertThrows(ValidationException.class,
 				() -> filmController.createFilm(new Film(12, "name", "desc", older, 12)));
 		String longDesc = "w".repeat(201);
-		final ValidationException exception3 = assertThrows(ValidationException.class,
-				() -> filmController.createFilm(new Film(12, "name", longDesc,
-						LocalDate.of(2012, 12, 12), 12)));
+		final ValidationException exception3 = assertThrows(ValidationException.class, () -> filmController.createFilm(
+				new Film(12, "name", longDesc, LocalDate.of(2012, 12, 12), 12)));
 		int negativeDuration = -3;
-		final ValidationException exception4 = assertThrows(ValidationException.class,
-				() -> filmController.createFilm(new Film(12, "name", "dfr",
-						LocalDate.of(2012, 12, 12), negativeDuration)));
+		final ValidationException exception4 = assertThrows(ValidationException.class, () -> filmController.createFilm(
+				new Film(12, "name", "dfr", LocalDate.of(2012, 12, 12),
+						negativeDuration)));
 		assertAll(
 			() -> assertEquals("Наименование фильма не может быть пустым.", exception1.getMessage()),
 			() -> assertEquals("Слишком старая дата фильма.", exception2.getMessage()),
