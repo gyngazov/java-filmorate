@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.ValidationException;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/films")
@@ -17,7 +19,7 @@ public class FilmController {
     private int id;
 
     public FilmController() {
-        films = new HashMap<>();
+        films = new ConcurrentHashMap<>();
         id = 0;
     }
 
@@ -27,7 +29,7 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> getFilms() {
-        log.info("Запрошен текущий список фильмов: " + films);
+        log.info("Запрошен текущий список фильмов. Всего фильмов: " + films.size());
         return films.values();
     }
 
@@ -71,7 +73,7 @@ public class FilmController {
             throw new ValidationException("Не задана дата фильма.");
         } else if (film.getReleaseDate().isBefore(FILM_EPOCH)) {
             throw new ValidationException("Слишком старая дата фильма.");
-        } else if (film.getName().isBlank()) {
+        } else if (StringUtils.isBlank(film.getName())) {
             throw new ValidationException("Наименование фильма не может быть пустым.");
         } else if (film.getDuration() < 1) {
             throw new ValidationException("Продолжительность фильма должна быть положительной.");

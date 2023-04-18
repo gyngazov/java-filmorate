@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.ValidationException;
@@ -14,8 +15,8 @@ import java.util.Map;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    Map<Integer, User> users;
-    int id;
+    private final Map<Integer, User> users;
+    private int id;
 
     public UserController() {
         users = new HashMap<>();
@@ -80,12 +81,12 @@ public class UserController {
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("День рождения не может быть в будущем.");
-        } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+        } else if (StringUtils.isBlank(user.getLogin()) || user.getLogin().contains(" ")) {
             throw new ValidationException("Логин не может быть пустым и содержать пробелы.");
-        } else if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+        } else if (StringUtils.isBlank(user.getEmail()) || !user.getEmail().contains("@")) {
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         }
-        if (user.getName() == null || user.getName().isBlank()) {
+        if (user.getName() == null || StringUtils.isBlank(user.getName())) {
             user.setName(user.getLogin());
         }
     }

@@ -31,6 +31,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+		<dependency>
+			<groupId>org.netbeans.external</groupId>
+			<artifactId>org-apache-commons-lang3</artifactId>
+			<version>RELEASE130</version>
+		</dependency>
     </dependencies>
 
 	<build>
