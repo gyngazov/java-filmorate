@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.ValidationException;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +35,7 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film createFilm(@RequestBody Film film) throws ValidationException {
+    public Film createFilm(@Valid @RequestBody Film film) throws ValidationException {
         validateFilm(film);
         int filmId = setId();
         film.setId(filmId);
@@ -44,7 +45,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film film) throws ValidationException {
+    public Film updateFilm(@Valid @RequestBody Film film) throws ValidationException {
         checkFilmInBase(film);
         validateFilm(film);
         int filmId = film.getId();

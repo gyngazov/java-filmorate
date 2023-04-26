@@ -7,7 +7,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
-import java.util.Objects;
+import java.util.*;
 
 @Data
 public class User {
@@ -20,6 +20,7 @@ public class User {
     @Past
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     LocalDate birthday;
+    Set<Integer> friends;
 
     public User(int id, String email, String login, String name, LocalDate birthday) {
         this.id = id;
@@ -27,6 +28,7 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
+        friends = new HashSet<>();
     }
 
     @Override
@@ -38,5 +40,14 @@ public class User {
                 && Objects.equals(getLogin(), user.getLogin())
                 && getName().equals(user.getName())
                 && getBirthday().equals(user.getBirthday());
+    }
+    public void addFriend(int id) {
+        friends.add(id);
+    }
+    public List<Integer> getFriendsIds() {
+        return new ArrayList<>(friends);
+    }
+    public void deleteFriend(int id) {
+        friends.remove(id);
     }
 }
