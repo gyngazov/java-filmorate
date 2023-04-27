@@ -48,4 +48,22 @@ public class Film implements Comparable<Film> {
     public int compareTo(Film film) {
         return Integer.compare(usersLikes.size(), film.getUsersLikes().size());
     }
+    public Set<Integer> getUserLikes() {
+        return usersLikes;
+    }
+    public void deleteLike(int id) throws ObjectNotFoundException {
+        if (!isUserInLikes(id)) {
+            throw new ObjectNotFoundException("Пользователь " + id + " не лайкал фильм " + getId());
+        }
+        usersLikes.remove(id);
+    }
+    public void addLike(int id) throws ObjectNotFoundException {
+        if (isUserInLikes(id)) {
+            throw new ObjectNotFoundException("Пользователь " + id + " уже лайкал фильм " + getId());
+        }
+        usersLikes.add(id);
+    }
+    private boolean isUserInLikes(int userId) {
+        return usersLikes.contains(userId);
+    }
 }

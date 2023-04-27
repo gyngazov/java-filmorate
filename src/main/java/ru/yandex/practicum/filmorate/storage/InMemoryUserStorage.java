@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -41,7 +40,6 @@ public class InMemoryUserStorage implements UserStorage {
             deleteFriend(id, user.getId());
         }
         users.remove(user.getId());
-
     }
     @Override
     public void deleteFriend(int userId1, int userId2) throws ObjectNotFoundException {

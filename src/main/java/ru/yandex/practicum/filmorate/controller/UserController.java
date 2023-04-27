@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.ValidationException;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -19,6 +20,10 @@ public class UserController {
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+    @GetMapping
+    public Collection<User> getUsers() {
+        return userService.getUsers();
     }
     @GetMapping("/{id}")
     public User getUser(@PathVariable int id) throws ObjectNotFoundException {

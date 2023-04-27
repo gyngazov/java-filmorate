@@ -1,87 +1,54 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.ValidationException;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/films")
-@Slf4j
 public class FilmController {
-    private static final LocalDate FILM_EPOCH = LocalDate.of(1895, 12, 28);
-    private final Map<Integer, Film> films;
-    private int id;
-
-    public FilmController() {
-        films = new ConcurrentHashMap<>();
-        id = 0;
-    }
-
-    private int setId() {
-        return ++id;
+    private final FilmService filmService;
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
     }
 
     @GetMapping
     public Collection<Film> getFilms() {
-        log.info("Запрошен текущий список фильмов. Всего фильмов: " + films.size());
-        return films.values();
+        return filmService.getFilms();
+    }
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable int id) throws ObjectNotFoundException {
+        return filmService.getFilm(id);
     }
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) throws ValidationException {
-        validateFilm(film);
-        int filmId = setId();
-        film.setId(filmId);
-        films.put(filmId, film);
-        log.info("Создан фильм " + film);
-        return film;
+        return filmService.createFilm(film);
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) throws ValidationException {
-        checkFilmInBase(film);
-        validateFilm(film);
-        int filmId = film.getId();
-        Film oldFilm = films.get(filmId);
-        films.put(filmId, film);
-        log.info("Фильм " + oldFilm + " изменен на " + film);
-        return film;
+    public Film updateFilm(@Valid @RequestBody Film film)
+            throws ValidationException, ObjectNotFoundException {
+        return filmService.updateFilm(film);
     }
-
-    private void checkFilmInBase(Film film) throws ValidationException {
-        if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Фильм с id " + film.getId() + "не найден.");
-        }
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable int id, @PathVariable int userId) throws ObjectNotFoundException {
+        filmService.addLike(id, userId);
     }
-
-    private void findFilm(Film film) throws ValidationException {
-        for (Film f: films.values()) {
-            if (f.equals(film)) {
-                throw new ValidationException("Такой фильм уже имеется с id " + f.getId());
-            }
-        }
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(@PathVariable int id, @PathVariable int userId) throws ObjectNotFoundException {
+        filmService.deleteLike(id, userId);
     }
-
-    private void validateFilm(Film film) throws ValidationException {
-        if (film.getReleaseDate() == null) {
-            throw new ValidationException("Не задана дата фильма.");
-        } else if (film.getReleaseDate().isBefore(FILM_EPOCH)) {
-            throw new ValidationException("Слишком старая дата фильма.");
-        } else if (StringUtils.isBlank(film.getName())) {
-            throw new ValidationException("Наименование фильма не может быть пустым.");
-        } else if (film.getDuration() < 1) {
-            throw new ValidationException("Продолжительность фильма должна быть положительной.");
-        } else if (film.getDescription().length() > 200) {
-            throw new ValidationException("Максимальная длина описания — 200 символов.");
-        }
-        findFilm(film);
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
+        return filmService.getFilmsByPopularity(count);
     }
-
 }

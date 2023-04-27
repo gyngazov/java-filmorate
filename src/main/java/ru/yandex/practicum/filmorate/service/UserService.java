@@ -9,10 +9,7 @@ import ru.yandex.practicum.filmorate.model.ValidationException;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -23,8 +20,9 @@ public class UserService {
     }
     public User createUser(User user) throws ValidationException {
         validateUser(user);
+        userStorage.createUser(user);
         log.info("Создан пользователь " + user);
-        return userStorage.createUser(user);
+        return user;
     }
     public User updateUser(User user)
             throws ValidationException, ObjectNotFoundException {
@@ -39,6 +37,9 @@ public class UserService {
     }
     public User getUser(int id) throws ObjectNotFoundException {
         return userStorage.getUser(id);
+    }
+    public Collection<User> getUsers() {
+        return userStorage.getUsers();
     }
 
     public void deleteUser(int id) throws ObjectNotFoundException {

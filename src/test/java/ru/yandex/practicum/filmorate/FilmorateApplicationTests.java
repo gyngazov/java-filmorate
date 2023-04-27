@@ -5,6 +5,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.ValidationException;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 
@@ -19,7 +21,8 @@ class FilmorateApplicationTests {
 
 	@Test
 	void shouldValidateNewFilmFields() {
-		FilmController filmController = new FilmController();
+		FilmController filmController =
+				new FilmController(new FilmService(new InMemoryFilmStorage()));
 		String emptyName = "";
 		final ValidationException exception1 = assertThrows(ValidationException.class,
 				() -> filmController.createFilm(new Film(12, emptyName, "desc",
