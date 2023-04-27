@@ -59,12 +59,14 @@ public class Film implements Comparable<Film> {
         }
         usersLikes.remove(id);
     }
+
     public void addLike(int id) throws ObjectNotFoundException {
         if (isUserInLikes(id)) {
             throw new ObjectNotFoundException("Пользователь " + id + " уже лайкал фильм " + getId());
         }
         usersLikes.add(id);
     }
+
     private boolean isUserInLikes(int userId) {
         return usersLikes.contains(userId);
     }
