@@ -37,6 +37,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.put(film.getId(), film);
     }
 
+    /**
+     * Удаляемы фильм должен быть в бд.
+     */
     @Override
     public void deleteFilm(int id) throws ObjectNotFoundException {
         getFilm(id);

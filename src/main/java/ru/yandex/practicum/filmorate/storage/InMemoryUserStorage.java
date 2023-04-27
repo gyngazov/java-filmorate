@@ -33,23 +33,35 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(User user) {
         return users.put(user.getId(), user);
     }
+
+    /**
+     * Удалять юзера из друзей у его друзей.
+     */
     @Override
-    public void deleteUser(User user)
-            throws ObjectNotFoundException {
+    public void deleteUser(User user) throws ObjectNotFoundException {
         for (int id: user.getFriends()) {
             deleteFriend(id, user.getId());
         }
         users.remove(user.getId());
     }
+
+    /**
+     * Проверять, что на удаление прислали id из бд.
+     */
     @Override
     public void deleteFriend(int userId1, int userId2) throws ObjectNotFoundException {
         User user = getUser(userId1);
+        getUser(userId2);
         user.deleteFriend(userId2);
         updateUser(user);
     }
+    /**
+     * Проверять, что на добавление прислали id из бд.
+     */
     @Override
     public void addFriend(int userId1, int userId2) throws ObjectNotFoundException {
         User user = getUser(userId1);
+        getUser(userId2);
         user.addFriend(userId2);
         updateUser(user);
     }

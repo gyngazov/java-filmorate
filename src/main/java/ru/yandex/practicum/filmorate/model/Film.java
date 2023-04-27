@@ -44,13 +44,15 @@ public class Film implements Comparable<Film> {
                 && getReleaseDate().equals(film.getReleaseDate())
                 && getName().equals(film.getName());
     }
+
+    /**
+     * Сорт по убыванию.
+     */
     @Override
     public int compareTo(Film film) {
-        return Integer.compare(usersLikes.size(), film.getUsersLikes().size());
+        return Integer.compare(film.getUsersLikes().size(), usersLikes.size());
     }
-    public Set<Integer> getUserLikes() {
-        return usersLikes;
-    }
+    
     public void deleteLike(int id) throws ObjectNotFoundException {
         if (!isUserInLikes(id)) {
             throw new ObjectNotFoundException("Пользователь " + id + " не лайкал фильм " + getId());
