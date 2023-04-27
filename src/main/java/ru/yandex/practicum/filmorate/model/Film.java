@@ -52,7 +52,7 @@ public class Film implements Comparable<Film> {
     public int compareTo(Film film) {
         return Integer.compare(film.getUsersLikes().size(), usersLikes.size());
     }
-    
+
     public void deleteLike(int id) throws ObjectNotFoundException {
         if (!isUserInLikes(id)) {
             throw new ObjectNotFoundException("Пользователь " + id + " не лайкал фильм " + getId());
