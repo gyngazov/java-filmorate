@@ -15,15 +15,18 @@ import java.util.*;
 @Slf4j
 public class UserService {
     UserStorage userStorage;
+
     public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
     }
+
     public User createUser(User user) throws ValidationException {
         validateUser(user);
         userStorage.createUser(user);
         log.info("Создан пользователь " + user);
         return user;
     }
+
     public User updateUser(User user)
             throws ValidationException, ObjectNotFoundException {
         if (user == null) {
@@ -35,9 +38,11 @@ public class UserService {
         log.info("Пользователь " + oldUser + " обновлен на " + user);
         return user;
     }
+
     public User getUser(int id) throws ObjectNotFoundException {
         return userStorage.getUser(id);
     }
+
     public Collection<User> getUsers() {
         return userStorage.getUsers();
     }
@@ -56,28 +61,32 @@ public class UserService {
         userStorage.addFriend(userId2, userId1);
         log.info("Пользователю с id " + userId1 + " добавлен друг с id " + userId2);
     }
+
     public List<User> getFriends(int id)
             throws ObjectNotFoundException {
         List<User> friends = new ArrayList<>();
-        for (Integer fid: userStorage.getUser(id).getFriends()) {
+        for (Integer fid : userStorage.getUser(id).getFriends()) {
             friends.add(userStorage.getUser(fid));
         }
         return friends;
     }
+
     public void deleteFriend(int userId1, int userId2) throws ObjectNotFoundException {
         userStorage.deleteFriend(userId1, userId2);
         userStorage.deleteFriend(userId2, userId1);
         log.info("Пользователи с id " + userId1 + "и " + userId2 + " более не друзья.");
     }
+
     public List<User> getCommonFriends(int userId1, int userId2) throws ObjectNotFoundException {
         Set<Integer> intersection = new HashSet<>(userStorage.getUser(userId1).getFriends());
         intersection.retainAll(userStorage.getUser(userId2).getFriends());
         List<User> commonFriends = new ArrayList<>();
-        for (Integer id: intersection) {
+        for (Integer id : intersection) {
             commonFriends.add(userStorage.getUser(id));
         }
         return commonFriends;
     }
+
     private void validateUser(User user) throws ValidationException {
         if (user.getBirthday() == null) {
             throw new ValidationException("Не задан день рождения.");

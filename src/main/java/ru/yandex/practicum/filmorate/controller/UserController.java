@@ -17,18 +17,22 @@ import java.util.List;
 @Slf4j
 public class UserController {
     private final UserService userService;
+
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
     @GetMapping
     public Collection<User> getUsers() {
         return userService.getUsers();
     }
+
     @GetMapping("/{id}")
     public User getUser(@PathVariable int id) throws ObjectNotFoundException {
         return userService.getUser(id);
     }
+
     @PostMapping
     public User createUser(@Valid @RequestBody User user) throws ValidationException {
         return userService.createUser(user);
@@ -39,20 +43,24 @@ public class UserController {
             throws ValidationException, ObjectNotFoundException {
         return userService.updateUser(user);
     }
+
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable int id, @PathVariable int friendId)
             throws ValidationException, ObjectNotFoundException {
         userService.addFriend(id, friendId);
     }
+
     @GetMapping("/{id}/friends")
     public List<User> getFriends(@PathVariable int id) throws ObjectNotFoundException {
         return userService.getFriends(id);
     }
+
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId)
             throws ObjectNotFoundException {
         return userService.getCommonFriends(id, otherId);
     }
+
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable int id, @PathVariable int friendId)
             throws ValidationException, ObjectNotFoundException {

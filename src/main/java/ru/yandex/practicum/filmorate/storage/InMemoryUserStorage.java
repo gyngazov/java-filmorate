@@ -17,6 +17,7 @@ public class InMemoryUserStorage implements UserStorage {
         this.users = new ConcurrentHashMap<>();
         id = 0;
     }
+
     @Override
     public int setId() {
         return ++id;
@@ -29,6 +30,7 @@ public class InMemoryUserStorage implements UserStorage {
         users.put(userId, user);
         return user;
     }
+
     @Override
     public User updateUser(User user) {
         return users.put(user.getId(), user);
@@ -39,7 +41,7 @@ public class InMemoryUserStorage implements UserStorage {
      */
     @Override
     public void deleteUser(User user) throws ObjectNotFoundException {
-        for (int id: user.getFriends()) {
+        for (int id : user.getFriends()) {
             deleteFriend(id, user.getId());
         }
         users.remove(user.getId());
@@ -55,6 +57,7 @@ public class InMemoryUserStorage implements UserStorage {
         user.deleteFriend(userId2);
         updateUser(user);
     }
+
     /**
      * Проверять, что на добавление прислали id из бд.
      */
@@ -65,6 +68,7 @@ public class InMemoryUserStorage implements UserStorage {
         user.addFriend(userId2);
         updateUser(user);
     }
+
     @Override
     public User getUser(int id) throws ObjectNotFoundException {
         if (!users.containsKey(id)) {
@@ -73,6 +77,7 @@ public class InMemoryUserStorage implements UserStorage {
             return users.get(id);
         }
     }
+
     @Override
     public Collection<User> getUsers() {
         return users.values();

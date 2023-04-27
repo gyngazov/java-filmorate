@@ -19,6 +19,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         films = new ConcurrentHashMap<>();
         id = 0;
     }
+
     @Override
     public int setId() {
         return ++id;
@@ -73,9 +74,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         film.deleteLike(userId);
         updateFilm(film);
     }
+
     public int getFilmsCount() {
         return films.size();
     }
+
     public List<Film> getFilmsByPopularity(int top) {
         return films
                 .values()

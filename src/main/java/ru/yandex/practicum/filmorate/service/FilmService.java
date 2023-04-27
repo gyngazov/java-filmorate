@@ -15,18 +15,20 @@ import java.util.List;
 @Service
 @Slf4j
 public class FilmService {
-    private final FilmStorage filmStorage;
     private static final LocalDate FILM_EPOCH = LocalDate.of(1895, 12, 28);
+    private final FilmStorage filmStorage;
 
     public FilmService(FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
+
     public Film createFilm(Film film) throws ValidationException {
         validateFilm(film);
         filmStorage.createFilm(film);
         log.info("Создан фильм " + film);
         return film;
     }
+
     public Film updateFilm(Film film)
             throws ValidationException, ObjectNotFoundException {
         if (film == null) {
@@ -38,22 +40,28 @@ public class FilmService {
         log.info("Фильм " + oldFilm + " обновлен на " + film);
         return film;
     }
+
     public Film getFilm(int id) throws ObjectNotFoundException {
         return filmStorage.getFilm(id);
     }
+
     public Collection<Film> getFilms() {
         log.info("Запрошен текущий список фильмов. Всего фильмов: " + filmStorage.getFilmsCount());
         return filmStorage.getFilms();
     }
+
     public void addLike(int filmId, int userId) throws ObjectNotFoundException {
         filmStorage.addLike(filmId, userId);
     }
+
     public void deleteLike(int filmId, int userId) throws ObjectNotFoundException {
         filmStorage.deleteLike(filmId, userId);
     }
+
     public List<Film> getFilmsByPopularity(int top) {
         return filmStorage.getFilmsByPopularity(top);
     }
+
     private void validateFilm(Film film) throws ValidationException {
         if (film.getReleaseDate() == null) {
             throw new ValidationException("Не задана дата фильма.");
