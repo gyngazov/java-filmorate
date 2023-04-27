@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.ValidationException;
 
@@ -10,15 +11,15 @@ public interface UserStorage {
 
     User createUser(User user) throws ValidationException;
 
-    User updateUser(User user) throws ValidationException;
+    User updateUser(User user) throws ValidationException, ObjectNotFoundException;
 
-    void deleteUser(User user) throws ValidationException;
+    void deleteUser(User user) throws ValidationException, ObjectNotFoundException;
 
-    User getUser(int id) throws ValidationException;
+    User getUser(int id) throws ObjectNotFoundException;
 
     Collection<User> getUsers();
 
-    void deleteFriend(int userId1, int userId2) throws ValidationException;
+    void deleteFriend(int userId1, int userId2) throws ValidationException, ObjectNotFoundException;
 
-    void addFriend(int userId1, int userId2) throws ValidationException;
+    void addFriend(int userId1, int userId2) throws ValidationException, ObjectNotFoundException;
 }

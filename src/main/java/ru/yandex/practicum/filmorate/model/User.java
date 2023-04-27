@@ -11,16 +11,16 @@ import java.util.*;
 
 @Data
 public class User {
-    int id;
+    private int id;
     @Email
-    String email;
+    private String email;
     @NotBlank
-    String login;
-    String name;
+    private String login;
+    private String name;
     @Past
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    LocalDate birthday;
-    Set<Integer> friends;
+    private LocalDate birthday;
+    private Set<Integer> friends;
 
     public User(int id, String email, String login, String name, LocalDate birthday) {
         this.id = id;
@@ -43,9 +43,6 @@ public class User {
     }
     public void addFriend(int id) {
         friends.add(id);
-    }
-    public List<Integer> getFriendsIds() {
-        return new ArrayList<>(friends);
     }
     public void deleteFriend(int id) {
         friends.remove(id);

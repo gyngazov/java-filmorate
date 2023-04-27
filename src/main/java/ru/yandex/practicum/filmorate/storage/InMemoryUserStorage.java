@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.ValidationException;
 
@@ -36,9 +37,10 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
     @Override
-    public User updateUser(User user) throws ValidationException {
+    public User updateUser(User user)
+            throws ValidationException, ObjectNotFoundException {
         if (user == null) {
-            throw new ValidationException("Пользователь не задан.");
+            throw new ObjectNotFoundException("Пользователь не задан.");
         }
         int userId = user.getId();
         User oldUser = getUser(userId);
@@ -48,34 +50,37 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
     @Override
-    public void deleteUser(User user) throws ValidationException {
+    public void deleteUser(User user)
+            throws ValidationException, ObjectNotFoundException {
         if (user == null) {
             log.info("Пользователь = null.");
             return;
         }
         int userId = user.getId();
-        for (int id: user.getFriendsIds()) {
+        for (int id: user.getFriends()) {
             deleteFriend(id, userId);
         }
         users.remove(userId);
         log.info("Пользователь " + user + " удален.");
     }
     @Override
-    public void deleteFriend(int userId1, int userId2) throws ValidationException {
+    public void deleteFriend(int userId1, int userId2)
+            throws ValidationException, ObjectNotFoundException {
         User user = getUser(userId1);
         user.deleteFriend(userId2);
         updateUser(user);
     }
     @Override
-    public void addFriend(int userId1, int userId2) throws ValidationException {
+    public void addFriend(int userId1, int userId2)
+            throws ObjectNotFoundException, ValidationException {
         User user = getUser(userId1);
-        user.getFriends().add(userId2);
+        user.addFriend(userId2);
         updateUser(user);
     }
     @Override
-    public User getUser(int id) throws ValidationException {
+    public User getUser(int id) throws ObjectNotFoundException {
         if (!users.containsKey(id)) {
-            throw new ValidationException("Пользователь с id " + id + " не найден.");
+            throw new ObjectNotFoundException("Пользователь с id " + id + " не найден.");
         } else {
             return users.get(id);
         }
@@ -93,7 +98,8 @@ public class InMemoryUserStorage implements UserStorage {
         } else if (StringUtils.isBlank(user.getLogin()) || user.getLogin().contains(" ")) {
             throw new ValidationException("Логин не может быть пустым и содержать пробелы.");
         } else if (StringUtils.isBlank(user.getEmail()) || !user.getEmail().contains("@")) {
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
+            throw new ValidationException("Электронная почта не может быть пустой "
+                    + "и должна содержать символ @");
         }
         if (user.getName() == null || StringUtils.isBlank(user.getName())) {
             user.setName(user.getLogin());
