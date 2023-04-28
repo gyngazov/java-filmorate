@@ -1,13 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import lombok.NonNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -22,7 +20,7 @@ public class User {
     private String name;
     @PastOrPresent
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @NonNull
+    @NotNull
     private LocalDate birthday;
     private Set<Integer> friends;
 
@@ -40,10 +38,7 @@ public class User {
         if (this == o) return true;
         if (!(o instanceof User)) return false;
         User user = (User) o;
-        return getEmail().equals(user.getEmail())
-                && Objects.equals(getLogin(), user.getLogin())
-                && getName().equals(user.getName())
-                && getBirthday().equals(user.getBirthday());
+        return getId() == user.getId();
     }
 
     public void addFriend(int id) {

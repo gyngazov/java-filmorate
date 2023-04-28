@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -55,7 +56,6 @@ public class InMemoryUserStorage implements UserStorage {
         User user = getUser(userId1);
         getUser(userId2);
         user.deleteFriend(userId2);
-        updateUser(user);
     }
 
     /**
@@ -66,7 +66,6 @@ public class InMemoryUserStorage implements UserStorage {
         User user = getUser(userId1);
         getUser(userId2);
         user.addFriend(userId2);
-        updateUser(user);
     }
 
     @Override
@@ -80,6 +79,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Collection<User> getUsers() {
-        return users.values();
+        return List.copyOf(users.values());
     }
 }

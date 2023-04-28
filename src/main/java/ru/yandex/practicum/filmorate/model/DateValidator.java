@@ -17,7 +17,7 @@ public class DateValidator implements ConstraintValidator<CustomDate, LocalDate>
         if (releaseDate == null) {
             return false;
         }
-        return releaseDate.isAfter(FILM_EPOCH);
+        return !releaseDate.isBefore(FILM_EPOCH);
     }
 
 }

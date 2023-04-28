@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import lombok.NonNull;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
@@ -16,12 +16,11 @@ public class Film implements Comparable<Film> {
     @NotBlank
     private String name;
     @Size(max = 200)
-    @NonNull
+    @NotNull
     private String description;
     @CustomDate
     private LocalDate releaseDate;
     @Positive
-    @NonNull
     private int duration;
     private Set<Integer> usersLikes;
 

@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.ValidationException;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -54,11 +55,12 @@ public class UserService {
     }
 
     public List<User> getFriends(int id) {
-        List<User> friends = new ArrayList<>();
-        for (Integer fid : userStorage.getUser(id).getFriends()) {
-            friends.add(userStorage.getUser(fid));
-        }
-        return friends;
+        return userStorage
+                .getUser(id)
+                .getFriends()
+                .stream()
+                .map(userStorage::getUser)
+                .collect(Collectors.toList());
     }
 
     public void deleteFriend(int userId1, int userId2) {
@@ -68,13 +70,9 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(int userId1, int userId2) {
-        Set<Integer> intersection = new HashSet<>(userStorage.getUser(userId1).getFriends());
-        intersection.retainAll(userStorage.getUser(userId2).getFriends());
-        List<User> commonFriends = new ArrayList<>();
-        for (Integer id : intersection) {
-            commonFriends.add(userStorage.getUser(id));
-        }
-        return commonFriends;
+        Set<User> intersection = new HashSet<>(getFriends(userId1));
+        intersection.retainAll(getFriends(userId2));
+        return new ArrayList<>(intersection);
     }
 
     private void validateUser(User user) {
