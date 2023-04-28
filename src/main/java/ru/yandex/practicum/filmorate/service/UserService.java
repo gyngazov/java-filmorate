@@ -23,19 +23,16 @@ public class UserService {
     public User createUser(User user) throws ValidationException {
         validateUser(user);
         userStorage.createUser(user);
-        log.info("Создан пользователь " + user);
+        log.info("Создан пользователь {}.", user);
         return user;
     }
 
     public User updateUser(User user)
             throws ValidationException, ObjectNotFoundException {
-        if (user == null) {
-            throw new ObjectNotFoundException("Пользователь не задан.");
-        }
         validateUser(user);
         User oldUser = getUser(user.getId());
         userStorage.updateUser(user);
-        log.info("Пользователь " + oldUser + " обновлен на " + user);
+        log.info("Пользователь {} обновлен на {}.", oldUser, user);
         return user;
     }
 
@@ -49,7 +46,7 @@ public class UserService {
 
     public void deleteUser(int id) throws ObjectNotFoundException {
         userStorage.deleteUser(getUser(id));
-        log.info("Пользователь с id " + id + " удален.");
+        log.info("Пользователь с id {} удален.", id);
     }
 
     public void addFriend(int userId1, int userId2)
@@ -59,7 +56,7 @@ public class UserService {
         }
         userStorage.addFriend(userId1, userId2);
         userStorage.addFriend(userId2, userId1);
-        log.info("Пользователю с id " + userId1 + " добавлен друг с id " + userId2);
+        log.info("Пользователю с id {} добавлен друг с id {}.", userId1, userId2);
     }
 
     public List<User> getFriends(int id)
@@ -74,7 +71,7 @@ public class UserService {
     public void deleteFriend(int userId1, int userId2) throws ObjectNotFoundException {
         userStorage.deleteFriend(userId1, userId2);
         userStorage.deleteFriend(userId2, userId1);
-        log.info("Пользователи с id " + userId1 + "и " + userId2 + " более не друзья.");
+        log.info("Пользователи с id {} и {} более не друзья.", userId1, userId2);
     }
 
     public List<User> getCommonFriends(int userId1, int userId2) throws ObjectNotFoundException {

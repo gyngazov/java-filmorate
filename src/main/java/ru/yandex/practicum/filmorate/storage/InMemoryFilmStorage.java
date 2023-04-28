@@ -39,7 +39,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     /**
-     * Удаляемы фильм должен быть в бд.
+     * Удаляемый фильм должен быть в бд.
      */
     @Override
     public void deleteFilm(int id) throws ObjectNotFoundException {

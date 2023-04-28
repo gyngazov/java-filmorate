@@ -25,19 +25,16 @@ public class FilmService {
     public Film createFilm(Film film) throws ValidationException {
         validateFilm(film);
         filmStorage.createFilm(film);
-        log.info("Создан фильм " + film);
+        log.info("Создан фильм {}.", film);
         return film;
     }
 
     public Film updateFilm(Film film)
             throws ValidationException, ObjectNotFoundException {
-        if (film == null) {
-            throw new ObjectNotFoundException("Фильм не задан.");
-        }
         validateFilm(film);
         Film oldFilm = getFilm(film.getId());
         filmStorage.updateFilm(film);
-        log.info("Фильм " + oldFilm + " обновлен на " + film);
+        log.info("Фильм {} обновлен на {}.", oldFilm, film);
         return film;
     }
 
@@ -46,7 +43,7 @@ public class FilmService {
     }
 
     public Collection<Film> getFilms() {
-        log.info("Запрошен текущий список фильмов. Всего фильмов: " + filmStorage.getFilmsCount());
+        log.info("Запрошен текущий список фильмов. Всего фильмов: {}.", filmStorage.getFilmsCount());
         return filmStorage.getFilms();
     }
 

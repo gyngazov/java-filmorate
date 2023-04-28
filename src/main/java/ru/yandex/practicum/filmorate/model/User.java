@@ -3,9 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
@@ -15,8 +13,10 @@ import java.util.Set;
 public class User {
     private int id;
     @Email
+    @NotEmpty
     private String email;
     @NotBlank
+    @Pattern(regexp = "\\S+")
     private String login;
     private String name;
     @Past
