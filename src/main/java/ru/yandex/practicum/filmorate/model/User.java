@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import lombok.NonNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.*;
@@ -19,8 +20,9 @@ public class User {
     @Pattern(regexp = "\\S+")
     private String login;
     private String name;
-    @Past
+    @PastOrPresent
     @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @NonNull
     private LocalDate birthday;
     private Set<Integer> friends;
 

@@ -1,10 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.NonNull;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
@@ -17,11 +16,12 @@ public class Film implements Comparable<Film> {
     @NotBlank
     private String name;
     @Size(max = 200)
+    @NonNull
     private String description;
-    @Past
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @CustomDate
     private LocalDate releaseDate;
     @Positive
+    @NonNull
     private int duration;
     private Set<Integer> usersLikes;
 
@@ -53,21 +53,15 @@ public class Film implements Comparable<Film> {
         return Integer.compare(film.getUsersLikes().size(), usersLikes.size());
     }
 
-    public void deleteLike(int id) throws ObjectNotFoundException {
-        if (!isUserInLikes(id)) {
+    public void deleteLike(int id) {
+        if (!usersLikes.remove(id)) {
             throw new ObjectNotFoundException("Пользователь " + id + " не лайкал фильм " + getId());
         }
-        usersLikes.remove(id);
     }
 
-    public void addLike(int id) throws ObjectNotFoundException {
-        if (isUserInLikes(id)) {
+    public void addLike(int id) {
+        if (!usersLikes.add(id)) {
             throw new ObjectNotFoundException("Пользователь " + id + " уже лайкал фильм " + getId());
         }
-        usersLikes.add(id);
-    }
-
-    private boolean isUserInLikes(int userId) {
-        return usersLikes.contains(userId);
     }
 }

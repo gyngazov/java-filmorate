@@ -40,7 +40,7 @@ public class InMemoryUserStorage implements UserStorage {
      * Удалять юзера из друзей у его друзей.
      */
     @Override
-    public void deleteUser(User user) throws ObjectNotFoundException {
+    public void deleteUser(User user) {
         for (int id : user.getFriends()) {
             deleteFriend(id, user.getId());
         }
@@ -51,7 +51,7 @@ public class InMemoryUserStorage implements UserStorage {
      * Проверять, что на удаление прислали id из бд.
      */
     @Override
-    public void deleteFriend(int userId1, int userId2) throws ObjectNotFoundException {
+    public void deleteFriend(int userId1, int userId2) {
         User user = getUser(userId1);
         getUser(userId2);
         user.deleteFriend(userId2);
@@ -62,7 +62,7 @@ public class InMemoryUserStorage implements UserStorage {
      * Проверять, что на добавление прислали id из бд.
      */
     @Override
-    public void addFriend(int userId1, int userId2) throws ObjectNotFoundException {
+    public void addFriend(int userId1, int userId2) {
         User user = getUser(userId1);
         getUser(userId2);
         user.addFriend(userId2);
@@ -70,7 +70,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUser(int id) throws ObjectNotFoundException {
+    public User getUser(int id) {
         if (!users.containsKey(id)) {
             throw new ObjectNotFoundException("Пользователь с id " + id + " не найден.");
         } else {

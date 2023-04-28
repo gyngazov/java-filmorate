@@ -42,13 +42,13 @@ public class InMemoryFilmStorage implements FilmStorage {
      * Удаляемый фильм должен быть в бд.
      */
     @Override
-    public void deleteFilm(int id) throws ObjectNotFoundException {
+    public void deleteFilm(int id) {
         getFilm(id);
         films.remove(id);
     }
 
     @Override
-    public Film getFilm(int id) throws ObjectNotFoundException {
+    public Film getFilm(int id) {
         if (!films.containsKey(id)) {
             throw new ObjectNotFoundException("Фильм с id " + id + " не найден.");
         } else {
@@ -62,14 +62,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(int filmId, int userId) throws ObjectNotFoundException {
+    public void addLike(int filmId, int userId) {
         Film film = getFilm(filmId);
         film.addLike(userId);
         updateFilm(film);
     }
 
     @Override
-    public void deleteLike(int filmId, int userId) throws ObjectNotFoundException {
+    public void deleteLike(int filmId, int userId) {
         Film film = getFilm(filmId);
         film.deleteLike(userId);
         updateFilm(film);

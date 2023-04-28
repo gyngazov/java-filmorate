@@ -8,22 +8,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.ValidationException;
 
+import javax.validation.ConstraintViolationException;
+
 @RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
 @Slf4j
 public class ErrorHandler {
 
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionResponse handleValidationError(final Exception e) {
-        log.debug("Ошибка валидации {}.", e.getMessage(), e);
-        return new ExceptionResponse("Ошибка валидации", e.getMessage());
+    public ExceptionResponse handleValidationError(final RuntimeException re) {
+        log.debug("Ошибка валидации {}.", re.getMessage(), re);
+        return new ExceptionResponse("Ошибка валидации", re.getMessage());
     }
 
     @ExceptionHandler(ObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionResponse handleAbsentObject(final Exception e) {
-        log.debug("Не найден объект {}.", e.getMessage(), e);
-        return new ExceptionResponse("Не найден объект", e.getMessage());
+    public ExceptionResponse handleAbsentObject(final RuntimeException re) {
+        log.debug("Не найден объект {}.", re.getMessage(), re);
+        return new ExceptionResponse("Не найден объект", re.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
@@ -31,5 +33,12 @@ public class ErrorHandler {
     public ExceptionResponse handleException(final Throwable t) {
         log.debug("Возникло исключение {}.", t.getMessage(), t);
         return new ExceptionResponse("Возникло исключение", t.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse handleConstraints(final ConstraintViolationException cve) {
+        log.debug("Ошибка параметра запроса {}.", cve.getMessage(), cve);
+        return new ExceptionResponse("Ошибка параметра запроса", cve.getMessage());
     }
 }
