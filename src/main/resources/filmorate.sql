@@ -1,9 +1,9 @@
 
-create table rating (
+create table ratings (
   id smallserial primary key,
   name varchar(8) unique not null
 );
-create table film (
+create table films (
     id serial primary key,
     name varchar(64) not null,
     description varchar(200),
@@ -26,18 +26,18 @@ create table likes (
     user_id int references users(id) not null,
     unique(film_id, user_id)
 );
-create table friend (
+create table friends (
     id serial primary key,
     user_id int references users(id) not null,
     friend_id int references users(id) not null,
     is_accepted boolean not null,
     unique(user_id, friend_id)
 );
-create table genre (
+create table genres (
   id smallserial primary key,
   name varchar(32) unique not null
 );
-create table film_genre (
+create table film_genres (
     id smallserial primary key,
     film_id int references film(id) not null,
     genre_id smallint references genre(id) not null,
