@@ -81,4 +81,9 @@ public class InMemoryUserStorage implements UserStorage {
     public Collection<User> getUsers() {
         return List.copyOf(users.values());
     }
+
+    @Override
+    public void clearDb() {
+        users.clear();
+    }
 }

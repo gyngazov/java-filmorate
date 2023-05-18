@@ -23,14 +23,19 @@ public class Film implements Comparable<Film> {
     @Positive
     private int duration;
     private Set<Integer> usersLikes;
+    @Positive
+    private int rating;
+    private Set<String> filmGenres;
 
-    public Film(int id, String name, String description, LocalDate releaseDate, int duration) {
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration, int rating) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.rating = rating;
         usersLikes = new HashSet<>();
+        filmGenres = new HashSet<>();
     }
 
     @Override

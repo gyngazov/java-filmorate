@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.model.Rating;
 
 import java.util.Collection;
 import java.util.List;
@@ -84,5 +86,25 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .sorted()
                 .limit(top)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void createGenre(Genre genre) {
+
+    }
+
+    @Override
+    public void createRating(Rating rating) {
+
+    }
+
+    @Override
+    public Genre getGenre(int id) {
+        return null;
+    }
+
+    @Override
+    public Rating getRating(int id) {
+        return null;
     }
 }

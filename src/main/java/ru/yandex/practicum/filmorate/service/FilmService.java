@@ -1,9 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.Collection;
@@ -11,9 +14,13 @@ import java.util.List;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
+
+    @Autowired
+    public FilmService(@Qualifier("dbFilmStorage") FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
+    }
 
     public Film createFilm(Film film) {
         filmStorage.createFilm(film);
@@ -47,5 +54,25 @@ public class FilmService {
 
     public List<Film> getFilmsByPopularity(int top) {
         return filmStorage.getFilmsByPopularity(top);
+    }
+
+    public Genre createGenre(Genre genre) {
+        filmStorage.createGenre(genre);
+        log.info("Создан жанр {}.", genre);
+        return genre;
+    }
+
+    public Genre getGenre(int id) {
+        return filmStorage.getGenre(id);
+    }
+
+    public Rating createRating(Rating rating) {
+        filmStorage.createRating(rating);
+        log.info("Создан рейтинг {}.", rating);
+        return rating;
+    }
+
+    public Rating getRating(int id) {
+        return filmStorage.getRating(id);
     }
 }

@@ -21,4 +21,6 @@ public interface UserStorage {
     void deleteFriend(int userId1, int userId2) throws ObjectNotFoundException;
 
     void addFriend(int userId1, int userId2) throws ObjectNotFoundException;
+
+    void clearDb();
 }
