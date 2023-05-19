@@ -28,11 +28,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film createFilm(Film film) {
+    public int createFilm(Film film) {
         int filmId = setId();
         film.setId(filmId);
         films.put(filmId, film);
-        return film;
+        return filmId;
     }
 
     @Override
@@ -89,13 +89,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void createGenre(Genre genre) {
-
+    public int createGenre(Genre genre) {
+        return 0;
     }
 
     @Override
-    public void createRating(Rating rating) {
-
+    public int createRating(Rating rating) {
+        return 0;
     }
 
     @Override
@@ -106,5 +106,20 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Rating getRating(int id) {
         return null;
+    }
+
+    @Override
+    public Collection<Genre> getGenres() {
+        return null;
+    }
+
+    @Override
+    public Collection<Rating> getRatings() {
+        return null;
+    }
+
+    @Override
+    public void addFilmGenre(int filmId, int genreId) {
+
     }
 }

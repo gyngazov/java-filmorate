@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.model.ValidationException;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
@@ -57,22 +59,43 @@ public class FilmService {
     }
 
     public Genre createGenre(Genre genre) {
-        filmStorage.createGenre(genre);
+        int id = filmStorage.createGenre(genre);
+        if (id == 0) {
+            throw new ValidationException("Не удалось вставить новый жанр.");
+        }
+        genre.setId(id);
         log.info("Создан жанр {}.", genre);
         return genre;
     }
 
-    public Genre getGenre(int id) {
+    public Genre getGenre(int id) throws SQLException {
         return filmStorage.getGenre(id);
     }
 
+    public void addFilmGenre(int filmId, int genreId) {
+        filmStorage.addFilmGenre(filmId, genreId);
+    }
+
+    public Collection<Genre> getGenres() {
+        return filmStorage.getGenres();
+    }
+
     public Rating createRating(Rating rating) {
-        filmStorage.createRating(rating);
+        int id = filmStorage.createRating(rating);
+        if (id == 0) {
+            throw new ValidationException("Не удалось вставить новый рейтинг.");
+        }
+        rating.setId(id);
         log.info("Создан рейтинг {}.", rating);
         return rating;
     }
 
-    public Rating getRating(int id) {
+    public Rating getRating(int id) throws SQLException {
         return filmStorage.getRating(id);
     }
+
+    public Collection<Rating> getRatings() {
+        return filmStorage.getRatings();
+    }
+
 }

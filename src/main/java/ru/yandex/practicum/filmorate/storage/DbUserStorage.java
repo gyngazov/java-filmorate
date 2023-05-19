@@ -52,11 +52,14 @@ public class DbUserStorage implements UserStorage {
     }
 
     /**
-     * Вспомогательный:
-     * - сбор мапы друзей по отдельному юзеру или по всем.
+     * usersFriends - мапа друзей юзера.
+     * Вспомогательный метод:
+     * - сбор мапы друзей по юзерам.
      * - запись друзей в соответствующих юзеров
      *
-     * @return users   при id>0 содержит один элемент
+     * @return users:
+     * - при id>0 содержит один элемент (если такой есть в users)
+     * - при id=0 содержит все записи users
      */
     private Collection<User> getUserById(int id) {
         Map<User, Set<Integer>> usersFriends = new HashMap<>();
@@ -95,6 +98,9 @@ public class DbUserStorage implements UserStorage {
         return getUserById(0);
     }
 
+    /**
+     * @param friendsMap мапа друзей юзера
+     */
     private User makeFriend(ResultSet rs, Map<User, Set<Integer>> friendsMap) throws SQLException {
         User user = makeUser(rs);
         Set<Integer> firstFriend;

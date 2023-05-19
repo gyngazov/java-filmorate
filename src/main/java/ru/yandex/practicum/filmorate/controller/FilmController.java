@@ -55,4 +55,9 @@ public class FilmController {
     public List<Film> getPopularFilms(@Positive @RequestParam(defaultValue = "10") int count) {
         return filmService.getFilmsByPopularity(count);
     }
+
+    @PutMapping("/{id}/genre/{genreId}")
+    public void addFilmGenre(@PathVariable int id, @PathVariable int genreId) {
+        filmService.addFilmGenre(id, genreId);
+    }
 }

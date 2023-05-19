@@ -25,7 +25,7 @@ public class Film implements Comparable<Film> {
     private Set<Integer> usersLikes;
     @Positive
     private int rating;
-    private Set<String> filmGenres;
+    private Set<Integer> filmGenres;
 
     public Film(int id, String name, String description, LocalDate releaseDate, int duration, int rating) {
         this.id = id;

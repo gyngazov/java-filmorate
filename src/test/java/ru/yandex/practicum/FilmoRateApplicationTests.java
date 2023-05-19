@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.FilmorateApplication;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.DbUserStorage;
 
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(classes = FilmorateApplication.class)
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmoRateApplicationTests {
@@ -27,10 +28,11 @@ class FilmoRateApplicationTests {
                 , "name0"
                 , LocalDate.of(2002, 11, 11));
         userStorage.createUser(testUser);
+        int testId = 11;
         User foundUser = userStorage.getUser(1);
         assertAll(
-                () -> assertNotNull(foundUser),
-                () -> assertEquals(foundUser.getId(), 1),
+                () -> assertNotNull(foundUser, "Не найден пользователь с id " + testId),
+                () -> assertEquals(foundUser.getId(), 1, "Найден пользователь с id != " + testId),
                 () -> assertEquals(foundUser.getEmail(), email)
         );
     }
