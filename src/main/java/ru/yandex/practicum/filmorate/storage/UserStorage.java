@@ -22,5 +22,7 @@ public interface UserStorage {
 
     void addFriend(int userId1, int userId2) throws ObjectNotFoundException;
 
-    void clearDb();
+    int acceptFriendship(int userId1, int userId2);
+
+    Collection<User> getFriends(int userId, boolean is_accepted);
 }

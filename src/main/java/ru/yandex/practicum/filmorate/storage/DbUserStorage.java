@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -134,16 +133,28 @@ public class DbUserStorage implements UserStorage {
     }
 
     @Override
-    public void clearDb() {
-        Stream
-                .of("likes"
-                        , "friends"
-                        , "users"
-                        , "film_genres"
-                        , "films"
-                        , "genres"
-                        , "ratings")
-                .map(t -> "delete from " + t)
-                .forEach(jdbcTemplate::update);
+    public int acceptFriendship(int userId1, int userId2) {
+        String accept = "update friends set is_accepted=true "
+                + "where user_id=? and friend_id=? and is_accepted=false";
+        return jdbcTemplate.update(accept, userId1, userId2);
     }
+
+    /**
+     * @param userId      id юзера
+     * @param is_accepted признак подтверждения дружбы
+     * @return список друзей данного юзера
+     */
+    @Override
+    public Collection<User> getFriends(int userId, boolean is_accepted) {
+        String selectFriends = "select u.* from friends f "
+                + "inner join users u on u.id=f.friend_id "
+                + "where f.user_id=? and f.is_accepted=?";
+        return jdbcTemplate.query(selectFriends, (rs, rowNum) -> new User(
+                rs.getInt(1)
+                , rs.getString(2)
+                , rs.getString(3)
+                , rs.getString(4)
+                , rs.getDate(5).toLocalDate()), userId, is_accepted);
+    }
+
 }

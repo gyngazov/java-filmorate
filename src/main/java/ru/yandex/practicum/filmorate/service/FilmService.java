@@ -98,4 +98,8 @@ public class FilmService {
         return filmStorage.getRatings();
     }
 
+    public void deleteFilmGenre(int filmId, int genreId) {
+        filmStorage.deleteFilmGenre(filmId, genreId);
+    }
+
 }

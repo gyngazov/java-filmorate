@@ -61,7 +61,9 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     /**
-     * Однотипная вставка в лайки или в жанры.
+     * Однотипная вставка в:
+     * - лайки
+     * - жанры.
      *
      * @param batch  список id
      * @param table  табла для вставки
@@ -93,9 +95,15 @@ public class DbFilmStorage implements FilmStorage {
         jdbcTemplate.update(insertFilmGenre, filmId, genreId);
     }
 
+    @Override
+    public void deleteFilmGenre(int filmId, int genreId) {
+        String deleteFilmGenre = "delete from film_genres where film_id=? and genre_id=?";
+        jdbcTemplate.update(deleteFilmGenre, filmId, genreId);
+    }
+
     /**
      * Лайки/жанры:
-     * - не обновляются
+     * - не обновляются при обновлении фильма
      * - добавляются/удаляются по одному в отдельных ендпойнтах
      */
     @Override
@@ -185,7 +193,7 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     private Collection<User> getFilmLikes(int filmId) {
-        String selectLikes = "select u.id, u.email, u.login, u.name, u.birthday from likes l"
+        String selectLikes = "select u.* from likes l "
                 + "inner join users u on u.id=l.user_id "
                 + "where l.film_id=?";
         return jdbcTemplate.query(selectLikes, (rs, rowNum) -> new User(
@@ -205,12 +213,12 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilmsByPopularity(int top) {
-        String topFilms = "select f.*"
-                + "from films f"
-                + "inner join likes l on"
-                + "l.film_id=f.id"
-                + "group by f.id, f.name"
-                + "order by count(l.id) desc"
+        String topFilms = "select f.* "
+                + "from films f "
+                + "inner join likes l on "
+                + "l.film_id=f.id "
+                + "group by f.id, f.name "
+                + "order by count(l.id) desc "
                 + "limit ?";
         return jdbcTemplate.query(topFilms, (rs, rowNum) -> new Film(
                 rs.getInt(1)
@@ -237,7 +245,7 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public Genre getGenre(int id) {
-        String selectGenre = "select id, name from genres where id=?";
+        String selectGenre = "select * from genres where id=?";
         SqlRowSet rs = jdbcTemplate.queryForRowSet(selectGenre, id);
         return rs.next() ? new Genre(rs.getString("name")
                 , rs.getInt("id")) : null;
@@ -245,14 +253,14 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public Collection<Genre> getGenres() {
-        String selectGenres = "select id, name from genres";
+        String selectGenres = "select * from genres";
         return jdbcTemplate.query(selectGenres
                 , (rs, rowNum) -> new Genre(rs.getString("name")
                         , rs.getInt("id")));
     }
 
     private Collection<Genre> getFilmGenres(int filmId) {
-        String selectGenres = "select g.id, g.name from film_genres f"
+        String selectGenres = "select g.id, g.name from film_genres f "
                 + "inner join genres g on g.id=f.genre_id "
                 + "where f.film_id=?";
         return jdbcTemplate.query(selectGenres

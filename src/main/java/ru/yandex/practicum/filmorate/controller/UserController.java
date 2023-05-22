@@ -61,8 +61,4 @@ public class UserController {
         userService.deleteFriend(id, friendId);
     }
 
-    @DeleteMapping("/123")
-    public void clearDb() {
-        userService.clearDb();
-    }
 }

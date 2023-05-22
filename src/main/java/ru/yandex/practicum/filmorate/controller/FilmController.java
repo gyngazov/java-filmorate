@@ -60,4 +60,9 @@ public class FilmController {
     public void addFilmGenre(@PathVariable int id, @PathVariable int genreId) {
         filmService.addFilmGenre(id, genreId);
     }
+
+    @DeleteMapping("/{id}/genre/{genreId}")
+    public void deleteFilmGenre(@PathVariable int id, @PathVariable int genreId) {
+        filmService.deleteFilmGenre(id, genreId);
+    }
 }

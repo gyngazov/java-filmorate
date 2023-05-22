@@ -43,4 +43,6 @@ public interface FilmStorage {
     Collection<Rating> getRatings();
 
     void addFilmGenre(int filmId, int genreId);
+
+    void deleteFilmGenre(int filmId, int genreId);
 }
