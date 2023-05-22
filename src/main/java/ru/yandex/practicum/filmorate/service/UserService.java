@@ -87,7 +87,14 @@ public class UserService {
         }
     }
 
-    public void clearDb() {
-        userStorage.clearDb();
+    public void acceptFriendship(int userId1, int userId2) {
+        if (userStorage
+                .getFriends(userId1, false)
+                .stream()
+                .anyMatch(u -> u.getId() == userId2)) {
+            userStorage.acceptFriendship(userId1, userId2);
+        } else {
+            throw new ValidationException("Дружба не запрашивалась.");
+        }
     }
 }

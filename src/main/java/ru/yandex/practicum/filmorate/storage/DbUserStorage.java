@@ -53,8 +53,10 @@ public class DbUserStorage implements UserStorage {
     /**
      * usersFriends - мапа друзей юзера.
      * Вспомогательный метод:
-     * - сбор мапы друзей по юзерам.
+     * - юзеры с друзьями получены за один запрос
+     * - сбор мапы друзей по юзерам
      * - запись друзей в соответствующих юзеров
+     * - дружбы выбираются подтвержденные
      *
      * @return users:
      * - при id>0 содержит один элемент (если такой есть в users)
@@ -65,8 +67,8 @@ public class DbUserStorage implements UserStorage {
         String uid = id > 0 ? "u.id" : "0";
         String userById = "select u.id, u.email, u.login, u.name, u.birthday, f.friend_id "
                 + "from users u "
-                + "left outer join friends f on "
-                + "u.id=f.user_id where " + uid + "=?";
+                + "left outer join friends f on u.id=f.user_id "
+                + "where f.is_accepted=true and " + uid + "=?";
         jdbcTemplate.query(userById, (rs, rowNum) -> makeFriend(rs, usersFriends), id);
         Collection<User> users = new ArrayList<>();
         for (User u : usersFriends.keySet()) {

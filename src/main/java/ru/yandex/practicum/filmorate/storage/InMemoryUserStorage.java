@@ -83,7 +83,12 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void clearDb() {
-        users.clear();
+    public int acceptFriendship(int userId1, int userId2) {
+        return 0;
+    }
+
+    @Override
+    public Collection<User> getFriends(int userId, boolean is_accepted) {
+        return null;
     }
 }

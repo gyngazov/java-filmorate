@@ -61,4 +61,8 @@ public class UserController {
         userService.deleteFriend(id, friendId);
     }
 
+    @PutMapping("/{id}/friends/accept/{otherId}")
+    public void acceptFriendship(@PathVariable int id, @PathVariable int friendId) {
+        userService.acceptFriendship(id, friendId);
+    }
 }

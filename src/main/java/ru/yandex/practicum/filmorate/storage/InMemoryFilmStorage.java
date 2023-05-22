@@ -122,4 +122,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void addFilmGenre(int filmId, int genreId) {
 
     }
+
+    @Override
+    public void deleteFilmGenre(int filmId, int genreId) {
+        
+    }
 }
