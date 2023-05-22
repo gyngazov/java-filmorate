@@ -7,8 +7,10 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 public class Film implements Comparable<Film> {
@@ -67,5 +69,13 @@ public class Film implements Comparable<Film> {
         if (!usersLikes.add(id)) {
             throw new ObjectNotFoundException("Пользователь " + id + " уже лайкал фильм " + getId());
         }
+    }
+
+    public void setLikes(Collection<User> users) {
+        setUsersLikes(users.stream().map(User::getId).collect(Collectors.toSet()));
+    }
+
+    public void setGenres(Collection<Genre> genres) {
+        setFilmGenres(genres.stream().map(Genre::getId).collect(Collectors.toSet()));
     }
 }
