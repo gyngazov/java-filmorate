@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.ValidationException;
@@ -43,7 +44,36 @@ public class UserService {
     }
 
     public Collection<User> getUsers() {
+        users.forEach(u -> u.setFriends(friends.get(u.getId())));
+        return users;
         return userStorage.getUsers();
+    }
+
+    /**
+     * Сбор мапы друзей по результату селекта.
+     * Одобренная дружба создает друзей взаимно.
+     *
+     * @return мапа между юзером и сетом его друзей
+     */
+    private Map<Integer, Set<Integer>> collectFriends(SqlRowSet srs) {
+        Map<Integer, Set<Integer>> friends = new HashMap<>();
+        int userId;
+        int friendId;
+        while (srs.next()) {
+            userId = srs.getInt(1);
+            friendId = srs.getInt(2);
+            if (friends.containsKey(userId)) {
+                friends.get(userId).add(friendId);
+                friends.get(friendId).add(userId);
+                System.out.println("friends c= " + friends);
+            } else {
+                friends.put(userId, new HashSet<>(friendId));
+                friends.put(friendId, new HashSet<>(userId));
+                System.out.println("friends n= " + friends);
+            }
+        }
+        System.out.println("friends r= " + friends);
+        return friends;
     }
 
     public void deleteUser(int id) {
@@ -56,7 +86,6 @@ public class UserService {
             throw new ValidationException("Нельзя добавить себя в друзья.");
         }
         userStorage.addFriend(userId1, userId2);
-        userStorage.addFriend(userId2, userId1);
         log.info("Пользователю с id {} добавлен друг с id {}.", userId1, userId2);
     }
 
@@ -71,7 +100,6 @@ public class UserService {
 
     public void deleteFriend(int userId1, int userId2) {
         userStorage.deleteFriend(userId1, userId2);
-        userStorage.deleteFriend(userId2, userId1);
         log.info("Пользователи с id {} и {} более не друзья.", userId1, userId2);
     }
 
@@ -93,6 +121,7 @@ public class UserService {
                 .stream()
                 .anyMatch(u -> u.getId() == userId2)) {
             userStorage.acceptFriendship(userId1, userId2);
+            log.info("Пользователь " + userId1 + " подтвердил дружбу пользователю " + userId2);
         } else {
             throw new ValidationException("Дружба не запрашивалась.");
         }

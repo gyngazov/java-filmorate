@@ -2,12 +2,15 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Relation;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +31,14 @@ public class DbUserStorage implements UserStorage {
                 , user.getName()
                 , user.getBirthday()
         );
+        user.setId(getLastId("users"));
         return user;
+    }
+
+    private int getLastId(String table) {
+        String lastId = "select max(id) from " + table;
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(lastId);
+        return rs.next() ? rs.getInt(1) : 0;
     }
 
     @Override
@@ -44,46 +54,42 @@ public class DbUserStorage implements UserStorage {
         return user;
     }
 
+    /**
+     * Перед удалением юзера чистить зависящие от него записи.
+     */
     @Override
     public void deleteUser(User user) {
+        clearFriends(user.getId());
+        clearLikes(user.getId());
         String deleteUser = "delete from users where id=?";
         jdbcTemplate.update(deleteUser, user.getId());
     }
 
-    /**
-     * usersFriends - мапа друзей юзера.
-     * Вспомогательный метод:
-     * - юзеры с друзьями получены за один запрос
-     * - сбор мапы друзей по юзерам
-     * - запись друзей в соответствующих юзеров
-     * - дружбы выбираются подтвержденные
-     *
-     * @return users:
-     * - при id>0 содержит один элемент (если такой есть в users)
-     * - при id=0 содержит все записи users
-     */
-    private Collection<User> getUserById(int id) {
-        Map<User, Set<Integer>> usersFriends = new HashMap<>();
-        String uid = id > 0 ? "u.id" : "0";
-        String userById = "select u.id, u.email, u.login, u.name, u.birthday, f.friend_id "
-                + "from users u "
-                + "left outer join friends f on u.id=f.user_id "
-                + "where f.is_accepted=true and " + uid + "=?";
-        jdbcTemplate.query(userById, (rs, rowNum) -> makeFriend(rs, usersFriends), id);
-        Collection<User> users = new ArrayList<>();
-        for (User u : usersFriends.keySet()) {
-            u.setFriends(usersFriends.get(u));
-            users.add(u);
-        }
-        return users;
-    }
-
     @Override
     public User getUser(int id) {
-        return getUserById(id)
-                .stream()
-                .findFirst()
-                .orElse(null);
+        String getUser = "select * from users where id=?";
+        SqlRowSet srs = jdbcTemplate.queryForRowSet(getUser, id);
+        User user;
+        if (srs.next()) {
+            user = new User(
+                    id
+                    , srs.getString(2)
+                    , srs.getString(3)
+                    , srs.getString(4)
+                    , Objects.requireNonNull(srs.getDate(5)).toLocalDate());
+        } else {
+            return null;
+        }
+        String getFriends = "select friend_id from friends "
+                + "where user_id=? and is_accepted=true "
+                + "union "
+                + "select user_id from friends "
+                + "where friend_id=? and is_accepted=true";
+        srs = jdbcTemplate.queryForRowSet(getFriends, id, id);
+        while (srs.next()) {
+            user.addFriend(srs.getInt(1));
+        }
+        return user;
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
@@ -96,31 +102,16 @@ public class DbUserStorage implements UserStorage {
 
     @Override
     public Collection<User> getUsers() {
-        return getUserById(0);
+        String getUsers = "select * from users";
+        return jdbcTemplate.query(getUsers, (rs, rowNum) -> makeUser(rs));
     }
 
-    /**
-     * @param friendsMap мапа друзей юзера
-     */
-    private User makeFriend(ResultSet rs, Map<User, Set<Integer>> friendsMap) throws SQLException {
-        User user = makeUser(rs);
-        Set<Integer> firstFriend;
-        int friendId = rs.getInt("friend_id");
-        if (rs.wasNull()) {
-            // null при left join будет единственный,
-            // поэтому когда встретится такой rs,
-            // то записи с данным user в мапе еще нет
-            firstFriend = new HashSet<>();
-        } else {
-            firstFriend = new HashSet<>(friendId);
-        }
-        if (friendsMap.containsKey(user)) {
-            friendsMap.get(user).add(friendId);
-        } else {
-            friendsMap.put(user, firstFriend);
-        }
-        return user;
+    public Collection<Relation> getFriends() {
+        String getFriends = "select user_id, friend_id from friends where is_accepted=true";
+        return jdbcTemplate.query(getFriends, (rs, rowNum)
+                -> new Relation(rs.getInt(1), rs.getInt(2)));
     }
+
 
     @Override
     public void deleteFriend(int userId1, int userId2) {
@@ -157,6 +148,22 @@ public class DbUserStorage implements UserStorage {
                 , rs.getString(3)
                 , rs.getString(4)
                 , rs.getDate(5).toLocalDate()), userId, is_accepted);
+    }
+
+    /**
+     * Очистить friends от userId для подготовки удаления данного юзера.
+     */
+    private void clearFriends(int userId) {
+        String deleteFriends = "delete from friends where user_id=? or friend_id=?";
+        jdbcTemplate.update(deleteFriends, userId, userId);
+    }
+
+    /**
+     * Очистить likes от userId для подготовки удаления данного юзера.
+     */
+    private void clearLikes(int userId) {
+        String deleteLikes = "delete from likes where user_id=?";
+        jdbcTemplate.update(deleteLikes, userId);
     }
 
 }
