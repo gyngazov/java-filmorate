@@ -65,11 +65,15 @@ public class UserService {
      *
      * @return мапа между юзером и сетом его друзей
      */
-    private Map<Integer, Set<Integer>> collectFriends(Collection<Relation> pairs) {
+    private Map<Integer, Set<Integer>> collectFriends(Collection<Relation> records) {
         Map<Integer, Set<Integer>> friends = new HashMap<>();
-        for (Relation pair : pairs) {
-            insertPair(friends, pair.getLeft(), pair.getRight());
-            insertPair(friends, pair.getRight(), pair.getLeft());
+        for (Relation record : records) {
+            if (record.isAccepted()) {
+                // подтвержденный друг дописывается к подтвердившему
+                insertPair(friends, record.getFriendId(), record.getUserId());
+            }
+            // подтвержденный или не подтвержденный друг дописывается к запросившему подтверждения
+            insertPair(friends, record.getUserId(), record.getFriendId());
         }
         return friends;
     }
@@ -77,15 +81,15 @@ public class UserService {
     /**
      * Вспомогательный - вставка пары в мапу.
      *
-     * @param friends мапа
-     * @param left    друг 1
-     * @param right   друг 2
+     * @param friends  мапа
+     * @param userId   друг 1
+     * @param friendId друг 2
      */
-    private void insertPair(Map<Integer, Set<Integer>> friends, int left, int right) {
-        if (!friends.containsKey(left)) {
-            friends.put(left, new HashSet<>());
+    private void insertPair(Map<Integer, Set<Integer>> friends, int userId, int friendId) {
+        if (!friends.containsKey(userId)) {
+            friends.put(userId, new HashSet<>());
         }
-        friends.get(left).add(right);
+        friends.get(userId).add(friendId);
     }
 
     public void deleteUser(int id) {

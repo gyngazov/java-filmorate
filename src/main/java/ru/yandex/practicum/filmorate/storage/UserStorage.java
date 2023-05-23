@@ -21,6 +21,8 @@ public interface UserStorage {
 
     Collection<Relation> getTrueFriends();
 
+    Collection<Relation> getAllFriends();
+
     void deleteFriend(int userId1, int userId2) throws ObjectNotFoundException;
 
     void addFriend(int userId1, int userId2) throws ObjectNotFoundException;

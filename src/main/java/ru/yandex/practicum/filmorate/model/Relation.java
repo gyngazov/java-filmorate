@@ -1,40 +1,38 @@
 package ru.yandex.practicum.filmorate.model;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 /**
  * Для обмена данными из friends между storage и service.
  */
 
-public class Relation extends Pair<Integer, Integer> {
-    private final int left;
-    private final int right;
+public class Relation {
+    private final int userId;
+    private final int friendId;
+    private final boolean isAccepted;
 
-    public Relation(int left, int right) {
-        this.left = left;
-        this.right = right;
+    public Relation(int userId, int friendId, boolean isAccepted) {
+        this.userId = userId;
+        this.friendId = friendId;
+        this.isAccepted = isAccepted;
     }
 
-    @Override
-    public Integer getLeft() {
-        return left;
+    public int getUserId() {
+        return userId;
     }
 
-    @Override
-    public Integer getRight() {
-        return right;
+    public int getFriendId() {
+        return friendId;
     }
 
-    @Override
-    public Integer setValue(Integer value) {
-        return null;
+    public boolean isAccepted() {
+        return isAccepted;
     }
 
     @Override
     public String toString() {
         return "Relation{" +
-                "left=" + left +
-                ", right=" + right +
+                "userId=" + userId +
+                ", friendId=" + friendId +
+                ", isAccepted=" + isAccepted +
                 '}';
     }
 }

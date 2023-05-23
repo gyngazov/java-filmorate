@@ -80,11 +80,14 @@ public class DbUserStorage implements UserStorage {
         } else {
             return null;
         }
-        String getFriends = "select friend_id from friends "
-                + "where user_id=? and is_accepted=true "
-                + "union "
-                + "select user_id from friends "
-                + "where friend_id=? and is_accepted=true";
+        String getFriends =
+                // мои друзья - это и подтвержденные и не подтвержденные
+                "select friend_id from friends "
+                        + "where user_id=? "
+                        + "union "
+                        // учесть тех, кому я подтвердил дружбу
+                        + "select user_id from friends "
+                        + "where friend_id=? and is_accepted=true";
         srs = jdbcTemplate.queryForRowSet(getFriends, id, id);
         while (srs.next()) {
             user.addFriend(srs.getInt(1));
@@ -107,10 +110,10 @@ public class DbUserStorage implements UserStorage {
     }
 
     @Override
-    public Collection<Relation> getTrueFriends() {
-        String getFriends = "select user_id, friend_id from friends where is_accepted=true";
+    public Collection<Relation> getAllFriends() {
+        String getFriends = "select user_id, friend_id, is_accepted from friends";
         return jdbcTemplate.query(getFriends, (rs, rowNum)
-                -> new Relation(rs.getInt(1), rs.getInt(2)));
+                -> new Relation(rs.getInt(1), rs.getInt(2), rs.getBoolean(3)));
     }
 
 
