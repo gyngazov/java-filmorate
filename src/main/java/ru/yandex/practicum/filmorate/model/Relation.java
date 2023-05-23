@@ -29,4 +29,12 @@ public class Relation extends Pair<Integer, Integer> {
     public Integer setValue(Integer value) {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "Relation{" +
+                "left=" + left +
+                ", right=" + right +
+                '}';
+    }
 }

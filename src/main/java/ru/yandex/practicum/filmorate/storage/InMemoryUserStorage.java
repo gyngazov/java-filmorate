@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.model.Relation;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -89,6 +90,11 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Collection<User> getFriends(int userId, boolean is_accepted) {
+        return null;
+    }
+
+    @Override
+    public Collection<Relation> getTrueFriends() {
         return null;
     }
 }

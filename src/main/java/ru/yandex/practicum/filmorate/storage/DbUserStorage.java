@@ -106,7 +106,8 @@ public class DbUserStorage implements UserStorage {
         return jdbcTemplate.query(getUsers, (rs, rowNum) -> makeUser(rs));
     }
 
-    public Collection<Relation> getFriends() {
+    @Override
+    public Collection<Relation> getTrueFriends() {
         String getFriends = "select user_id, friend_id from friends where is_accepted=true";
         return jdbcTemplate.query(getFriends, (rs, rowNum)
                 -> new Relation(rs.getInt(1), rs.getInt(2)));

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.model.Relation;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -17,6 +18,8 @@ public interface UserStorage {
     User getUser(int id) throws ObjectNotFoundException;
 
     Collection<User> getUsers();
+
+    Collection<Relation> getTrueFriends();
 
     void deleteFriend(int userId1, int userId2) throws ObjectNotFoundException;
 

@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Relation;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.ValidationException;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -43,10 +43,20 @@ public class UserService {
         return userStorage.getUser(id);
     }
 
+    /**
+     * Сбор всех юзеров.
+     * В два запроса:
+     * - к users
+     * - к friends
+     * По friends сбор мапы.
+     *
+     * @return список объектов User
+     */
     public Collection<User> getUsers() {
+        Collection<User> users = userStorage.getUsers();
+        Map<Integer, Set<Integer>> friends = collectFriends(userStorage.getTrueFriends());
         users.forEach(u -> u.setFriends(friends.get(u.getId())));
         return users;
-        return userStorage.getUsers();
     }
 
     /**
@@ -55,25 +65,27 @@ public class UserService {
      *
      * @return мапа между юзером и сетом его друзей
      */
-    private Map<Integer, Set<Integer>> collectFriends(SqlRowSet srs) {
+    private Map<Integer, Set<Integer>> collectFriends(Collection<Relation> pairs) {
         Map<Integer, Set<Integer>> friends = new HashMap<>();
-        int userId;
-        int friendId;
-        while (srs.next()) {
-            userId = srs.getInt(1);
-            friendId = srs.getInt(2);
-            if (friends.containsKey(userId)) {
-                friends.get(userId).add(friendId);
-                friends.get(friendId).add(userId);
-                System.out.println("friends c= " + friends);
-            } else {
-                friends.put(userId, new HashSet<>(friendId));
-                friends.put(friendId, new HashSet<>(userId));
-                System.out.println("friends n= " + friends);
-            }
+        for (Relation pair : pairs) {
+            insertPair(friends, pair.getLeft(), pair.getRight());
+            insertPair(friends, pair.getRight(), pair.getLeft());
         }
-        System.out.println("friends r= " + friends);
         return friends;
+    }
+
+    /**
+     * Вспомогательный - вставка пары в мапу.
+     *
+     * @param friends мапа
+     * @param left    друг 1
+     * @param right   друг 2
+     */
+    private void insertPair(Map<Integer, Set<Integer>> friends, int left, int right) {
+        if (!friends.containsKey(left)) {
+            friends.put(left, new HashSet<>());
+        }
+        friends.get(left).add(right);
     }
 
     public void deleteUser(int id) {
