@@ -3,8 +3,8 @@ package ru.yandex.practicum.filmorate.storage;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
-import ru.yandex.practicum.filmorate.model.Rating;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,15 +38,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         return films.put(film.getId(), film);
-    }
-
-    /**
-     * Удаляемый фильм должен быть в бд.
-     */
-    @Override
-    public void deleteFilm(int id) {
-        getFilm(id);
-        films.remove(id);
     }
 
     @Override
@@ -89,22 +80,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public int createGenre(Genre genre) {
-        return 0;
-    }
-
-    @Override
-    public int createRating(Rating rating) {
-        return 0;
-    }
-
-    @Override
     public Genre getGenre(int id) {
         return null;
     }
 
     @Override
-    public Rating getRating(int id) {
+    public Mpa getMpa(int id) {
         return null;
     }
 
@@ -114,7 +95,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Rating> getRatings() {
+    public Collection<Mpa> getMpas() {
         return null;
     }
 
@@ -125,6 +106,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void deleteFilmGenre(int filmId, int genreId) {
-        
+
     }
 }

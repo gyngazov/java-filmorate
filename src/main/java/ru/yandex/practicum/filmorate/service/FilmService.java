@@ -6,9 +6,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Rating;
-import ru.yandex.practicum.filmorate.model.ValidationException;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -18,27 +19,37 @@ import java.util.List;
 @Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(@Qualifier("dbFilmStorage") FilmStorage filmStorage) {
+    public FilmService(@Qualifier("dbFilmStorage") FilmStorage filmStorage
+            , @Qualifier("dbUserStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
 
     public Film createFilm(Film film) {
-        filmStorage.createFilm(film);
+        film.setId(filmStorage.createFilm(film));
         log.info("Создан фильм {}.", film);
         return film;
     }
 
     public Film updateFilm(Film film) {
         Film oldFilm = getFilm(film.getId());
+        if (oldFilm == null) {
+            throw new ObjectNotFoundException("Фильм с " + film.getId() + " не найден.");
+        }
         filmStorage.updateFilm(film);
         log.info("Фильм {} обновлен на {}.", oldFilm, film);
         return film;
     }
 
     public Film getFilm(int id) {
-        return filmStorage.getFilm(id);
+        Film film = filmStorage.getFilm(id);
+        if (film == null) {
+            throw new ObjectNotFoundException("Фильм с " + id + " не найден.");
+        }
+        return film;
     }
 
     public Collection<Film> getFilms() {
@@ -47,7 +58,13 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        filmStorage.addLike(filmId, userId);
+        if (filmStorage.getFilm(filmId) == null) {
+            throw new ObjectNotFoundException("Фильм с " + filmId + " не найден.");
+        } else if (userStorage.getUser(userId) == null) {
+            throw new ObjectNotFoundException("Пользователь с " + userId + " не найден.");
+        } else {
+            filmStorage.addLike(filmId, userId);
+        }
     }
 
     public void deleteLike(int filmId, int userId) {
@@ -56,16 +73,6 @@ public class FilmService {
 
     public List<Film> getFilmsByPopularity(int top) {
         return filmStorage.getFilmsByPopularity(top);
-    }
-
-    public Genre createGenre(Genre genre) {
-        int id = filmStorage.createGenre(genre);
-        if (id == 0) {
-            throw new ValidationException("Не удалось вставить новый жанр.");
-        }
-        genre.setId(id);
-        log.info("Создан жанр {}.", genre);
-        return genre;
     }
 
     public Genre getGenre(int id) throws SQLException {
@@ -80,22 +87,12 @@ public class FilmService {
         return filmStorage.getGenres();
     }
 
-    public Rating createRating(Rating rating) {
-        int id = filmStorage.createRating(rating);
-        if (id == 0) {
-            throw new ValidationException("Не удалось вставить новый рейтинг.");
-        }
-        rating.setId(id);
-        log.info("Создан рейтинг {}.", rating);
-        return rating;
+    public Mpa getMpa(int id) throws SQLException {
+        return filmStorage.getMpa(id);
     }
 
-    public Rating getRating(int id) throws SQLException {
-        return filmStorage.getRating(id);
-    }
-
-    public Collection<Rating> getRatings() {
-        return filmStorage.getRatings();
+    public Collection<Mpa> getMpas() {
+        return filmStorage.getMpas();
     }
 
     public void deleteFilmGenre(int filmId, int genreId) {

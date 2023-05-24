@@ -7,12 +7,16 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -39,47 +43,39 @@ public class DbFilmStorage implements FilmStorage {
                 , film.getDescription()
                 , film.getReleaseDate()
                 , film.getDuration()
-                , film.getRating()
+                , film.getMpa().getId()
         );
-        int filmId = getLastId("films");
-        insertBatch(filmId, new ArrayList<>(film.getFilmGenres()), "film_genres", "genre_id");
-        insertBatch(filmId, new ArrayList<>(film.getUsersLikes()), "likes", "user_id");
+        int filmId = getLastId();
+        if (film.getGenres() != null) {
+            insertBatch(filmId, new ArrayList<>(film.getGenres()));
+        }
         return filmId;
     }
 
     /**
-     * id последней записи в табле.
+     * id последней записи в films.
      * Упрощенное получение id только что вставленной записи.
      *
-     * @param table имя таблы
      * @return id
      */
-    private int getLastId(String table) {
-        String lastId = "select max(id) from " + table;
+    private int getLastId() {
+        String lastId = "select max(id) from films";
         SqlRowSet rs = jdbcTemplate.queryForRowSet(lastId);
         return rs.next() ? rs.getInt(1) : 0;
     }
 
     /**
-     * Однотипная вставка в:
-     * - лайки
-     * - жанры.
+     * Однотипная вставка в жанры.
      *
-     * @param batch  список id
-     * @param table  табла для вставки
-     * @param column колонка для вставки списка
+     * @param batch список id
      */
-    private void insertBatch(int filmId, List<Integer> batch, String table, String column) {
-        String insertQuery = "insert into "
-                + table
-                + "(film_id, "
-                + column
-                + ") values(?, ?)";
+    private void insertBatch(int filmId, List<Genre> batch) {
+        String insertQuery = "insert into film_genres (film_id, genre_id) values(?, ?)";
         jdbcTemplate.batchUpdate(insertQuery, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setInt(1, filmId);
-                ps.setInt(2, batch.get(i));
+                ps.setInt(2, batch.get(i).getId());
             }
 
             @Override
@@ -116,50 +112,29 @@ public class DbFilmStorage implements FilmStorage {
                 , film.getDescription()
                 , film.getReleaseDate()
                 , film.getDuration()
-                , film.getRating()
+                , film.getMpa().getId()
                 , film.getId()
         );
         return film;
     }
 
     @Override
-    public void deleteFilm(int id) {
-        String del = "delete from films where id=?";
-        jdbcTemplate.update(del, id);
-    }
-
-    @Override
-    public Film getFilm(int id) {
+    public Film getFilm(int filmId) {
         String queryFilm = "select * from films where id=?";
-        SqlRowSet rs = jdbcTemplate.queryForRowSet(queryFilm, id);
-        Film film = rs.next() ? new Film(rs.getInt(1)
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(queryFilm, filmId);
+        Film film = rs.next() ? new Film(
+                rs.getInt(1)
                 , rs.getString(2)
                 , rs.getString(3)
                 , Objects.requireNonNull(rs.getDate(4)).toLocalDate()
                 , rs.getInt(5)
-                , rs.getInt(6)) : null;
+                , getMpa(rs.getInt(6))
+                , null) : null;
         if (film == null) {
             return null;
         }
-        film.setFilmGenres(getColumn3("film_genres", id));
-        film.setUsersLikes(getColumn3("likes", id));
+        film.setGenres(getFilmGenres(filmId));
         return film;
-    }
-
-    /**
-     * Получение лайков либо жанров ввиду единообразия хранения.
-     *
-     * @param tabName имя таблицы хранения
-     * @return найденные id в виде сета
-     */
-    private Set<Integer> getColumn3(String tabName, int id) {
-        String query = "select * from " + tabName + " where film_id=?";
-        SqlRowSet rs = jdbcTemplate.queryForRowSet(query, id);
-        Set<Integer> column3 = new HashSet<>();
-        while (rs.next()) {
-            column3.add(rs.getInt(3));
-        }
-        return column3;
     }
 
     @Override
@@ -172,11 +147,9 @@ public class DbFilmStorage implements FilmStorage {
                         , rs.getString("description")
                         , rs.getDate("release_date").toLocalDate()
                         , rs.getInt("duration")
-                        , rs.getInt("rating_id")));
-        for (Film f : films) {
-            f.setLikes(getFilmLikes(f.getId()));
-            f.setGenres(getFilmGenres(f.getId()));
-        }
+                        , getMpa(rs.getInt("rating_id"))
+                        , getFilmGenres(rs.getInt(1))));
+        films.forEach(f -> f.setLikes(getFilmLikes(f.getId())));
         return films;
     }
 
@@ -213,74 +186,74 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilmsByPopularity(int top) {
-        String topFilms = "select f.* "
-                + "from films f "
-                + "inner join likes l on "
-                + "l.film_id=f.id "
-                + "group by f.id, f.name "
-                + "order by count(l.id) desc "
-                + "limit ?";
+        String topFilms =
+                "select f.id, f.name, f.description, f.release_date, f.duration, f.rating_id "
+                        + "from films f "
+                        + "left outer join likes l on "
+                        + "l.film_id=f.id "
+                        + "group by f.id, f.name, f.description, f.release_date, f.duration, f.rating_id "
+                        + "order by count(case when l.id is null then 0 else 1 end) desc "
+                        + "limit ?";
         return jdbcTemplate.query(topFilms, (rs, rowNum) -> new Film(
-                rs.getInt(1)
-                , rs.getString(2)
-                , rs.getString(3)
-                , rs.getDate(4).toLocalDate()
-                , rs.getInt(5)
-                , rs.getInt(6)), top);
-    }
-
-    @Override
-    public int createGenre(Genre genre) {
-        String insertGenre = "insert into genres(name) values(?)";
-        jdbcTemplate.update(insertGenre, genre.getName());
-        return getLastId("genres");
-    }
-
-    @Override
-    public int createRating(Rating rating) {
-        String insertGenre = "insert into ratings(name) values(?)";
-        jdbcTemplate.update(insertGenre, rating.getName());
-        return getLastId("ratings");
+                        rs.getInt(1)
+                        , rs.getString(2)
+                        , rs.getString(3)
+                        , rs.getDate(4).toLocalDate()
+                        , rs.getInt(5)
+                        , getMpa(rs.getInt(6))
+                        , getFilmGenres(rs.getInt(1)))
+                , top);
     }
 
     @Override
     public Genre getGenre(int id) {
         String selectGenre = "select * from genres where id=?";
         SqlRowSet rs = jdbcTemplate.queryForRowSet(selectGenre, id);
-        return rs.next() ? new Genre(rs.getString("name")
-                , rs.getInt("id")) : null;
+        Genre genre;
+        if (rs.next()) {
+            genre = new Genre(rs.getInt("id"));
+        } else {
+            return null;
+        }
+        genre.setName(rs.getString("name"));
+        return genre;
     }
 
     @Override
     public Collection<Genre> getGenres() {
         String selectGenres = "select * from genres";
-        return jdbcTemplate.query(selectGenres
-                , (rs, rowNum) -> new Genre(rs.getString("name")
-                        , rs.getInt("id")));
+        return jdbcTemplate.query(selectGenres, (rs, rowNum)
+                -> new Genre(rs.getInt("id")));
     }
 
     private Collection<Genre> getFilmGenres(int filmId) {
         String selectGenres = "select g.id, g.name from film_genres f "
                 + "inner join genres g on g.id=f.genre_id "
                 + "where f.film_id=?";
-        return jdbcTemplate.query(selectGenres
-                , (rs, rowNum) -> new Genre(rs.getString("name")
-                        , rs.getInt("id")), filmId);
+        return jdbcTemplate.query(selectGenres, (rs, rowNum)
+                -> new Genre(rs.getInt("id")), filmId);
     }
 
     @Override
-    public Collection<Rating> getRatings() {
+    public Collection<Mpa> getMpas() {
         String selectRatings = "select id, name from ratings";
-        return jdbcTemplate.query(selectRatings
-                , (rs, rowNum) -> new Rating(rs.getString("name")
-                        , rs.getInt("id")));
+        return jdbcTemplate.query(selectRatings, (rs, rowNum) -> setMpa(rs));
+    }
+
+    private Mpa setMpa(ResultSet rs) throws SQLException {
+        Mpa mpa = new Mpa();
+        mpa.setId(rs.getInt(1));
+        mpa.setName(rs.getString(2));
+        return mpa;
     }
 
     @Override
-    public Rating getRating(int id) {
+    public Mpa getMpa(int id) {
         String selectRating = "select id, name from ratings where id=?";
-        SqlRowSet rs = jdbcTemplate.queryForRowSet(selectRating, id);
-        return rs.next() ? new Rating(rs.getString("name")
-                , rs.getInt("id")) : null;
+        return jdbcTemplate
+                .query(selectRating, (rs, rowNum) -> setMpa(rs), id)
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 }

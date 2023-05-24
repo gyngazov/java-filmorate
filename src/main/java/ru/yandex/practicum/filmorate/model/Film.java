@@ -25,19 +25,19 @@ public class Film implements Comparable<Film> {
     @Positive
     private int duration;
     private Set<Integer> usersLikes;
-    @Positive
-    private int rating;
-    private Set<Integer> filmGenres;
+    private Mpa mpa;
+    private Collection<Genre> genres;
 
-    public Film(int id, String name, String description, LocalDate releaseDate, int duration, int rating) {
+    public Film(int id, String name, String description, LocalDate releaseDate
+            , int duration, Mpa mpa, Collection<Genre> genres) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.rating = rating;
+        this.mpa = mpa;
         usersLikes = new HashSet<>();
-        filmGenres = new HashSet<>();
+        this.genres = genres;
     }
 
     @Override
@@ -75,7 +75,4 @@ public class Film implements Comparable<Film> {
         setUsersLikes(users.stream().map(User::getId).collect(Collectors.toSet()));
     }
 
-    public void setGenres(Collection<Genre> genres) {
-        setFilmGenres(genres.stream().map(Genre::getId).collect(Collectors.toSet()));
-    }
 }
