@@ -10,7 +10,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -58,20 +60,19 @@ public class DbUserStorage implements UserStorage {
      * Перед удалением юзера чистить зависящие от него записи.
      */
     @Override
-    public void deleteUser(User user) {
+    public int deleteUser(User user) {
         clearFriends(user.getId());
         clearLikes(user.getId());
         String deleteUser = "delete from users where id=?";
-        jdbcTemplate.update(deleteUser, user.getId());
+        return jdbcTemplate.update(deleteUser, user.getId());
     }
 
     @Override
     public User getUser(int id) {
         String getUser = "select * from users where id=?";
         SqlRowSet srs = jdbcTemplate.queryForRowSet(getUser, id);
-        User user;
         if (srs.next()) {
-            user = new User(
+            return new User(
                     id
                     , srs.getString(2)
                     , srs.getString(3)
@@ -80,6 +81,14 @@ public class DbUserStorage implements UserStorage {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Сбор int-ов друзей юзера.
+     */
+    @Override
+    public Set<Integer> getFriends(int userId) {
+        Set<Integer> friends = new HashSet<>();
         String getFriends =
                 // мои друзья - это и подтвержденные и не подтвержденные
                 "select friend_id from friends "
@@ -88,11 +97,11 @@ public class DbUserStorage implements UserStorage {
                         // учесть тех, кому я подтвердил дружбу
                         + "select user_id from friends "
                         + "where friend_id=? and is_accepted=true";
-        srs = jdbcTemplate.queryForRowSet(getFriends, id, id);
+        SqlRowSet srs = jdbcTemplate.queryForRowSet(getFriends, userId, userId);
         while (srs.next()) {
-            user.addFriend(srs.getInt(1));
+            friends.add(srs.getInt(1));
         }
-        return user;
+        return friends;
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
@@ -118,9 +127,9 @@ public class DbUserStorage implements UserStorage {
 
 
     @Override
-    public void deleteFriend(int userId1, int userId2) {
+    public int deleteFriend(int userId1, int userId2) {
         String deleteFriend = "delete from friends where user_id=? and friend_id=?";
-        jdbcTemplate.update(deleteFriend, userId1, userId2);
+        return jdbcTemplate.update(deleteFriend, userId1, userId2);
     }
 
     @Override
@@ -134,24 +143,6 @@ public class DbUserStorage implements UserStorage {
         String accept = "update friends set is_accepted=true "
                 + "where user_id=? and friend_id=? and is_accepted=false";
         return jdbcTemplate.update(accept, userId1, userId2);
-    }
-
-    /**
-     * @param userId      id юзера
-     * @param is_accepted признак подтверждения дружбы
-     * @return список друзей данного юзера
-     */
-    @Override
-    public Collection<User> getFriends(int userId, boolean is_accepted) {
-        String selectFriends = "select u.* from friends f "
-                + "inner join users u on u.id=f.friend_id "
-                + "where f.user_id=? and f.is_accepted=?";
-        return jdbcTemplate.query(selectFriends, (rs, rowNum) -> new User(
-                rs.getInt(1)
-                , rs.getString(2)
-                , rs.getString(3)
-                , rs.getString(4)
-                , rs.getDate(5).toLocalDate()), userId, is_accepted);
     }
 
     /**

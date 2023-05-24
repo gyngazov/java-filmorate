@@ -17,7 +17,7 @@ create table if not exists users (
     id int auto_increment primary key,
     email varchar(32) unique not null,
     login varchar(16) not null,
-    name varchar(16) not null,
+    name varchar(64) not null,
     birthday date not null,
     check(birthday <= cast(now() as date)) -- исключаем не родившихся пользователей
 );

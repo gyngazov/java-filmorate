@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Relation;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.ValidationException;
@@ -32,15 +33,23 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        validateUser(user);
         User oldUser = getUser(user.getId());
+        if (oldUser == null) {
+            throw new ObjectNotFoundException("Пользователь " + oldUser + " не найден.");
+        }
+        validateUser(user);
         userStorage.updateUser(user);
         log.info("Пользователь {} обновлен на {}.", oldUser, user);
         return user;
     }
 
     public User getUser(int id) {
-        return userStorage.getUser(id);
+        User user = userStorage.getUser(id);
+        if (user == null) {
+            throw new ObjectNotFoundException("Пользователь " + id + " не найден.");
+        }
+        user.setFriends(userStorage.getFriends(id));
+        return user;
     }
 
     /**
@@ -54,13 +63,13 @@ public class UserService {
      */
     public Collection<User> getUsers() {
         Collection<User> users = userStorage.getUsers();
-        Map<Integer, Set<Integer>> friends = collectFriends(userStorage.getTrueFriends());
+        Map<Integer, Set<Integer>> friends = collectFriends(userStorage.getAllFriends());
         users.forEach(u -> u.setFriends(friends.get(u.getId())));
         return users;
     }
 
     /**
-     * Сбор мапы друзей по результату селекта.
+     * Сбор мапы друзей по таблице friends.
      * Одобренная дружба создает друзей взаимно.
      *
      * @return мапа между юзером и сетом его друзей
@@ -93,13 +102,20 @@ public class UserService {
     }
 
     public void deleteUser(int id) {
-        userStorage.deleteUser(getUser(id));
-        log.info("Пользователь с id {} удален.", id);
+        if (userStorage.deleteUser(getUser(id)) == 0) {
+            throw new ObjectNotFoundException("Пользователь " + id + " не найден для удаления.");
+        } else {
+            log.info("Пользователь с id {} удален.", id);
+        }
     }
 
     public void addFriend(int userId1, int userId2) {
         if (userId1 == userId2) {
             throw new ValidationException("Нельзя добавить себя в друзья.");
+        } else if (getUser(userId1) == null) {
+            throw new ObjectNotFoundException("Пользователь " + userId1 + " не найден.");
+        } else if (getUser(userId2) == null) {
+            throw new ObjectNotFoundException("Пользователь " + userId2 + " не найден.");
         }
         userStorage.addFriend(userId1, userId2);
         log.info("Пользователю с id {} добавлен друг с id {}.", userId1, userId2);
@@ -107,16 +123,18 @@ public class UserService {
 
     public List<User> getFriends(int id) {
         return userStorage
-                .getUser(id)
-                .getFriends()
+                .getFriends(id)
                 .stream()
-                .map(userStorage::getUser)
+                .map(this::getUser)
                 .collect(Collectors.toList());
     }
 
     public void deleteFriend(int userId1, int userId2) {
-        userStorage.deleteFriend(userId1, userId2);
-        log.info("Пользователи с id {} и {} более не друзья.", userId1, userId2);
+        if (userStorage.deleteFriend(userId1, userId2) == 0) {
+            throw new ObjectNotFoundException(userId2 + " не состоит в друзьях у " + userId1);
+        } else {
+            log.info("Пользователи с id {} и {} более не друзья.", userId1, userId2);
+        }
     }
 
     public List<User> getCommonFriends(int userId1, int userId2) {
@@ -132,14 +150,10 @@ public class UserService {
     }
 
     public void acceptFriendship(int userId1, int userId2) {
-        if (userStorage
-                .getFriends(userId1, false)
-                .stream()
-                .anyMatch(u -> u.getId() == userId2)) {
-            userStorage.acceptFriendship(userId1, userId2);
-            log.info("Пользователь " + userId1 + " подтвердил дружбу пользователю " + userId2);
-        } else {
+        if (userStorage.acceptFriendship(userId1, userId2) == 0) {
             throw new ValidationException("Дружба не запрашивалась.");
+        } else {
+            log.info("Пользователь " + userId1 + " подтвердил дружбу пользователю " + userId2);
         }
     }
 }

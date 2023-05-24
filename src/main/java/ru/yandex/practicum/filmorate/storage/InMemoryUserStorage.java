@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -42,21 +43,23 @@ public class InMemoryUserStorage implements UserStorage {
      * Удалять юзера из друзей у его друзей.
      */
     @Override
-    public void deleteUser(User user) {
+    public int deleteUser(User user) {
         for (int id : user.getFriends()) {
             deleteFriend(id, user.getId());
         }
         users.remove(user.getId());
+        return 0;
     }
 
     /**
      * Проверять, что на удаление прислали id из бд.
      */
     @Override
-    public void deleteFriend(int userId1, int userId2) {
+    public int deleteFriend(int userId1, int userId2) {
         User user = getUser(userId1);
         getUser(userId2);
         user.deleteFriend(userId2);
+        return 0;
     }
 
     /**
@@ -84,17 +87,19 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public Collection<Relation> getAllFriends() {
+        return null;
+    }
+
+    @Override
     public int acceptFriendship(int userId1, int userId2) {
-        return 0;
+
+        return userId1;
     }
 
     @Override
-    public Collection<User> getFriends(int userId, boolean is_accepted) {
+    public Set<Integer> getFriends(int userId) {
         return null;
     }
 
-    @Override
-    public Collection<Relation> getTrueFriends() {
-        return null;
-    }
 }

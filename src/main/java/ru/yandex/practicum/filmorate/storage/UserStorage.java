@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.Relation;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.Set;
 
 public interface UserStorage {
     int setId();
@@ -13,21 +14,19 @@ public interface UserStorage {
 
     User updateUser(User user) throws ObjectNotFoundException;
 
-    void deleteUser(User user) throws ObjectNotFoundException;
+    int deleteUser(User user) throws ObjectNotFoundException;
 
     User getUser(int id) throws ObjectNotFoundException;
 
-    Collection<User> getUsers();
+    Set<Integer> getFriends(int userId);
 
-    Collection<Relation> getTrueFriends();
+    Collection<User> getUsers();
 
     Collection<Relation> getAllFriends();
 
-    void deleteFriend(int userId1, int userId2) throws ObjectNotFoundException;
+    int deleteFriend(int userId1, int userId2) throws ObjectNotFoundException;
 
     void addFriend(int userId1, int userId2) throws ObjectNotFoundException;
 
     int acceptFriendship(int userId1, int userId2);
-
-    Collection<User> getFriends(int userId, boolean is_accepted);
 }
