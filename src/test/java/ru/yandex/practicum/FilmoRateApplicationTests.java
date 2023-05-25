@@ -22,11 +22,11 @@ class FilmoRateApplicationTests {
     @Test
     public void testFindUserById() {
         String email = "em@il.ru";
-        User testUser = new User(111
-                , email
-                , "l0gin"
-                , "name0"
-                , LocalDate.of(2002, 11, 11));
+        User testUser = new User(111,
+                email,
+                "l0gin",
+                "name0",
+                LocalDate.of(2002, 11, 11));
         userStorage.createUser(testUser);
         int testId = 11;
         User foundUser = userStorage.getUser(1);
