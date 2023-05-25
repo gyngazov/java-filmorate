@@ -44,11 +44,7 @@ public class User {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId()
-                , getEmail()
-                , getLogin()
-                , getName()
-                , getBirthday());
+        return Objects.hash(getId(), getEmail(), getLogin(), getName(), getBirthday());
     }
 
     public void addFriend(int id) {
