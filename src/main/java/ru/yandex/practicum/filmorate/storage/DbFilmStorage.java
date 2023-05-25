@@ -208,6 +208,12 @@ public class DbFilmStorage implements FilmStorage {
         return rs.next() ? rs.getInt(1) : 0;
     }
 
+    /**
+     * В популярные должны попасть фильмы, даже если нет лайков.
+     * Из-за этого:
+     * - left outer join
+     * - order by sum
+     */
     @Override
     public List<Film> getFilmsByPopularity(int top) {
         String topFilms =
