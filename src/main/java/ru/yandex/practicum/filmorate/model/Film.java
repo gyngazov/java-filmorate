@@ -29,8 +29,8 @@ public class Film implements Comparable<Film> {
     private Mpa mpa;
     private Collection<Genre> genres;
 
-    public Film(int id, String name, String description, LocalDate releaseDate
-            , int duration, Mpa mpa, Collection<Genre> genres) {
+    public Film(int id, String name, String description, LocalDate releaseDate,
+                int duration, Mpa mpa, Collection<Genre> genres) {
         this.id = id;
         this.name = name;
         this.description = description;
