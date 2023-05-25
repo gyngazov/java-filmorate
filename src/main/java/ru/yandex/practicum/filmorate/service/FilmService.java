@@ -28,6 +28,7 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
+
     public Film createFilm(Film film) {
         film.setId(filmStorage.createFilm(film));
         log.info("Создан фильм {}.", film);
@@ -39,7 +40,7 @@ public class FilmService {
         if (oldFilm == null) {
             throw new ObjectNotFoundException("Фильм с " + film.getId() + " не найден.");
         }
-        filmStorage.updateFilm(film);
+        film = filmStorage.updateFilm(film);
         log.info("Фильм {} обновлен на {}.", oldFilm, film);
         return film;
     }
@@ -68,7 +69,13 @@ public class FilmService {
     }
 
     public void deleteLike(int filmId, int userId) {
-        filmStorage.deleteLike(filmId, userId);
+        if (filmStorage.getFilm(filmId) == null) {
+            throw new ObjectNotFoundException("Фильм с " + filmId + " не найден.");
+        } else if (userStorage.getUser(userId) == null) {
+            throw new ObjectNotFoundException("Пользователь с " + userId + " не найден.");
+        } else {
+            filmStorage.deleteLike(filmId, userId);
+        }
     }
 
     public List<Film> getFilmsByPopularity(int top) {
@@ -76,11 +83,21 @@ public class FilmService {
     }
 
     public Genre getGenre(int id) throws SQLException {
-        return filmStorage.getGenre(id);
+        Genre genre = filmStorage.getGenre(id);
+        if (genre == null) {
+            throw new ObjectNotFoundException("Жанр с id " + id + " не найден.");
+        }
+        return genre;
     }
 
-    public void addFilmGenre(int filmId, int genreId) {
-        filmStorage.addFilmGenre(filmId, genreId);
+    public void addFilmGenre(int filmId, int genreId) throws SQLException {
+        if (filmStorage.getFilm(filmId) == null) {
+            throw new ObjectNotFoundException("Фильм с id " + filmId + " не найден.");
+        } else if (filmStorage.getGenre(genreId) == null) {
+            throw new ObjectNotFoundException("Жанр с id " + genreId + " не найден.");
+        } else {
+            filmStorage.addFilmGenre(filmId, genreId);
+        }
     }
 
     public Collection<Genre> getGenres() {
@@ -88,15 +105,26 @@ public class FilmService {
     }
 
     public Mpa getMpa(int id) throws SQLException {
-        return filmStorage.getMpa(id);
+        Mpa mpa = filmStorage.getMpa(id);
+        if (mpa == null) {
+            throw new ObjectNotFoundException("Рейтинг с id " + id + " не найден.");
+        } else {
+            return mpa;
+        }
     }
 
     public Collection<Mpa> getMpas() {
         return filmStorage.getMpas();
     }
 
-    public void deleteFilmGenre(int filmId, int genreId) {
-        filmStorage.deleteFilmGenre(filmId, genreId);
+    public void deleteFilmGenre(int filmId, int genreId) throws SQLException {
+        if (filmStorage.getFilm(filmId) == null) {
+            throw new ObjectNotFoundException("Фильм с id " + filmId + " не найден.");
+        } else if (filmStorage.getGenre(genreId) == null) {
+            throw new ObjectNotFoundException("Жанр с id " + genreId + " не найден.");
+        } else {
+            filmStorage.deleteFilmGenre(filmId, genreId);
+        }
     }
 
 }

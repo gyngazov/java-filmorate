@@ -25,6 +25,7 @@ public class Film implements Comparable<Film> {
     @Positive
     private int duration;
     private Set<Integer> usersLikes;
+    @NotNull
     private Mpa mpa;
     private Collection<Genre> genres;
 

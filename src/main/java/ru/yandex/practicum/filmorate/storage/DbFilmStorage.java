@@ -98,12 +98,12 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     /**
-     * Лайки/жанры:
-     * - не обновляются при обновлении фильма
-     * - добавляются/удаляются по одному в отдельных ендпойнтах
+     * Обновить вместе с жанрами.
      */
     @Override
     public Film updateFilm(Film film) {
+        int filmId = film.getId();
+        Film filmBefore = getFilm(filmId);
         String update = "update films set name=?, description=?, "
                 + "release_date=?, duration=?, rating_id=? "
                 + "where id=?";
@@ -113,9 +113,33 @@ public class DbFilmStorage implements FilmStorage {
                 , film.getReleaseDate()
                 , film.getDuration()
                 , film.getMpa().getId()
-                , film.getId()
+                , filmId
         );
-        return film;
+        if (film.getGenres() != null) {
+            updateFilmGenres(filmId, filmBefore.getGenres(), film.getGenres());
+        }
+        return getFilm(filmId);
+    }
+
+    /**
+     * Обновить жанры по простому:
+     * - удалить жанры из бд
+     * - вставить жанры из json
+     * - по одной записи
+     * - без транзакции
+     *
+     * @param genresBefore жанры бд
+     * @param genresAfter  жанры json
+     */
+    private void updateFilmGenres(int filmId, Collection<Genre> genresBefore, Collection<Genre> genresAfter) {
+        for (Genre g : genresBefore) {
+            deleteFilmGenre(filmId, g.getId());
+        }
+        genresAfter
+                .stream()
+                .map(Genre::getId)
+                .distinct()
+                .forEach(id -> addFilmGenre(filmId, id));
     }
 
     @Override
@@ -192,7 +216,7 @@ public class DbFilmStorage implements FilmStorage {
                         + "left outer join likes l on "
                         + "l.film_id=f.id "
                         + "group by f.id, f.name, f.description, f.release_date, f.duration, f.rating_id "
-                        + "order by count(case when l.id is null then 0 else 1 end) desc "
+                        + "order by sum(case when l.id is null then 0 else 1 end) desc "
                         + "limit ?";
         return jdbcTemplate.query(topFilms, (rs, rowNum) -> new Film(
                         rs.getInt(1)
@@ -211,32 +235,38 @@ public class DbFilmStorage implements FilmStorage {
         SqlRowSet rs = jdbcTemplate.queryForRowSet(selectGenre, id);
         Genre genre;
         if (rs.next()) {
-            genre = new Genre(rs.getInt("id"));
+            genre = new Genre();
         } else {
             return null;
         }
+        genre.setId(rs.getInt("id"));
         genre.setName(rs.getString("name"));
         return genre;
     }
 
     @Override
     public Collection<Genre> getGenres() {
-        String selectGenres = "select * from genres";
-        return jdbcTemplate.query(selectGenres, (rs, rowNum)
-                -> new Genre(rs.getInt("id")));
+        String selectGenres = "select * from genres order by id";
+        return jdbcTemplate.query(selectGenres, (rs, rowNum) -> setGenre(rs));
     }
 
     private Collection<Genre> getFilmGenres(int filmId) {
         String selectGenres = "select g.id, g.name from film_genres f "
                 + "inner join genres g on g.id=f.genre_id "
                 + "where f.film_id=?";
-        return jdbcTemplate.query(selectGenres, (rs, rowNum)
-                -> new Genre(rs.getInt("id")), filmId);
+        return jdbcTemplate.query(selectGenres, (rs, rowNum) -> setGenre(rs), filmId);
+    }
+
+    private Genre setGenre(ResultSet rs) throws SQLException {
+        Genre genre = new Genre();
+        genre.setId(rs.getInt("id"));
+        genre.setName(rs.getString("name"));
+        return genre;
     }
 
     @Override
     public Collection<Mpa> getMpas() {
-        String selectRatings = "select id, name from ratings";
+        String selectRatings = "select id, name from ratings order by id";
         return jdbcTemplate.query(selectRatings, (rs, rowNum) -> setMpa(rs));
     }
 

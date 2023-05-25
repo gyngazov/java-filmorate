@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
@@ -57,12 +58,12 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/genre/{genreId}")
-    public void addFilmGenre(@PathVariable int id, @PathVariable int genreId) {
+    public void addFilmGenre(@PathVariable int id, @PathVariable int genreId) throws SQLException {
         filmService.addFilmGenre(id, genreId);
     }
 
     @DeleteMapping("/{id}/genre/{genreId}")
-    public void deleteFilmGenre(@PathVariable int id, @PathVariable int genreId) {
+    public void deleteFilmGenre(@PathVariable int id, @PathVariable int genreId) throws SQLException {
         filmService.deleteFilmGenre(id, genreId);
     }
 }
