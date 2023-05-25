@@ -38,12 +38,12 @@ public class DbFilmStorage implements FilmStorage {
     public int createFilm(Film film) {
         String insertFilm = "insert into films(name, description, release_date, duration, rating_id) "
                 + "values(?, ?, ?, ?, ?)";
-        jdbcTemplate.update(insertFilm
-                , film.getName()
-                , film.getDescription()
-                , film.getReleaseDate()
-                , film.getDuration()
-                , film.getMpa().getId()
+        jdbcTemplate.update(insertFilm,
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getMpa().getId()
         );
         int filmId = getLastId();
         if (film.getGenres() != null) {
@@ -107,13 +107,13 @@ public class DbFilmStorage implements FilmStorage {
         String update = "update films set name=?, description=?, "
                 + "release_date=?, duration=?, rating_id=? "
                 + "where id=?";
-        jdbcTemplate.update(update
-                , film.getName()
-                , film.getDescription()
-                , film.getReleaseDate()
-                , film.getDuration()
-                , film.getMpa().getId()
-                , filmId
+        jdbcTemplate.update(update,
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getMpa().getId(),
+                filmId
         );
         if (film.getGenres() != null) {
             updateFilmGenres(filmId, filmBefore.getGenres(), film.getGenres());
@@ -147,13 +147,13 @@ public class DbFilmStorage implements FilmStorage {
         String queryFilm = "select * from films where id=?";
         SqlRowSet rs = jdbcTemplate.queryForRowSet(queryFilm, filmId);
         Film film = rs.next() ? new Film(
-                rs.getInt(1)
-                , rs.getString(2)
-                , rs.getString(3)
-                , Objects.requireNonNull(rs.getDate(4)).toLocalDate()
-                , rs.getInt(5)
-                , getMpa(rs.getInt(6))
-                , null) : null;
+                rs.getInt(1),
+                rs.getString(2),
+                rs.getString(3),
+                Objects.requireNonNull(rs.getDate(4)).toLocalDate(),
+                rs.getInt(5),
+                getMpa(rs.getInt(6)),
+                null) : null;
         if (film == null) {
             return null;
         }
@@ -166,13 +166,13 @@ public class DbFilmStorage implements FilmStorage {
         String queryFilms = "select * from films";
         Collection<Film> films = jdbcTemplate
                 .query(queryFilms, (rs, rowNum) -> new Film(
-                        rs.getInt("id")
-                        , rs.getString("name")
-                        , rs.getString("description")
-                        , rs.getDate("release_date").toLocalDate()
-                        , rs.getInt("duration")
-                        , getMpa(rs.getInt("rating_id"))
-                        , getFilmGenres(rs.getInt(1))));
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getDate("release_date").toLocalDate(),
+                        rs.getInt("duration"),
+                        getMpa(rs.getInt("rating_id")),
+                        getFilmGenres(rs.getInt(1))));
         films.forEach(f -> f.setLikes(getFilmLikes(f.getId())));
         return films;
     }
@@ -194,11 +194,11 @@ public class DbFilmStorage implements FilmStorage {
                 + "inner join users u on u.id=l.user_id "
                 + "where l.film_id=?";
         return jdbcTemplate.query(selectLikes, (rs, rowNum) -> new User(
-                rs.getInt("id")
-                , rs.getString("email")
-                , rs.getString("login")
-                , rs.getString("name")
-                , rs.getDate("birthday").toLocalDate()), filmId);
+                rs.getInt("id"),
+                rs.getString("email"),
+                rs.getString("login"),
+                rs.getString("name"),
+                rs.getDate("birthday").toLocalDate()), filmId);
     }
 
     @Override
@@ -225,14 +225,14 @@ public class DbFilmStorage implements FilmStorage {
                         + "order by sum(case when l.id is null then 0 else 1 end) desc "
                         + "limit ?";
         return jdbcTemplate.query(topFilms, (rs, rowNum) -> new Film(
-                        rs.getInt(1)
-                        , rs.getString(2)
-                        , rs.getString(3)
-                        , rs.getDate(4).toLocalDate()
-                        , rs.getInt(5)
-                        , getMpa(rs.getInt(6))
-                        , getFilmGenres(rs.getInt(1)))
-                , top);
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getDate(4).toLocalDate(),
+                        rs.getInt(5),
+                        getMpa(rs.getInt(6)),
+                        getFilmGenres(rs.getInt(1))),
+                top);
     }
 
     @Override

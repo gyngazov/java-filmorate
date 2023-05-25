@@ -27,11 +27,11 @@ public class DbUserStorage implements UserStorage {
     @Override
     public User createUser(User user) {
         String addUser = "insert into users (email, login, name, birthday) values(?, ?, ?, ?)";
-        jdbcTemplate.update(addUser
-                , user.getEmail()
-                , user.getLogin()
-                , user.getName()
-                , user.getBirthday()
+        jdbcTemplate.update(addUser,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday()
         );
         user.setId(getLastId("users"));
         return user;
@@ -46,12 +46,12 @@ public class DbUserStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         String updateUser = "update users set email=?, login=?, name=?, birthday=? where id=?";
-        jdbcTemplate.update(updateUser
-                , user.getEmail()
-                , user.getLogin()
-                , user.getName()
-                , user.getBirthday()
-                , user.getId()
+        jdbcTemplate.update(updateUser,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday(),
+                user.getId()
         );
         return user;
     }
@@ -73,11 +73,11 @@ public class DbUserStorage implements UserStorage {
         SqlRowSet srs = jdbcTemplate.queryForRowSet(getUser, id);
         if (srs.next()) {
             return new User(
-                    id
-                    , srs.getString(2)
-                    , srs.getString(3)
-                    , srs.getString(4)
-                    , Objects.requireNonNull(srs.getDate(5)).toLocalDate());
+                    id,
+                    srs.getString(2),
+                    srs.getString(3),
+                    srs.getString(4),
+                    Objects.requireNonNull(srs.getDate(5)).toLocalDate());
         } else {
             return null;
         }
@@ -105,11 +105,11 @@ public class DbUserStorage implements UserStorage {
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
-        return new User(rs.getInt("id")
-                , rs.getString("email")
-                , rs.getString("login")
-                , rs.getString("name")
-                , rs.getDate("birthday").toLocalDate());
+        return new User(rs.getInt("id"),
+                rs.getString("email"),
+                rs.getString("login"),
+                rs.getString("name"),
+                rs.getDate("birthday").toLocalDate());
     }
 
     @Override
