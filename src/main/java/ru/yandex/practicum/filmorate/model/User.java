@@ -3,23 +3,26 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.Objects;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class User {
-    int id;
+    private int id;
     @Email
-    String email;
+    @NotEmpty
+    private String email;
     @NotBlank
-    String login;
-    String name;
-    @Past
+    @Pattern(regexp = "\\S+")
+    private String login;
+    private String name;
+    @PastOrPresent
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    LocalDate birthday;
+    @NotNull
+    private LocalDate birthday;
+    private Set<Integer> friends;
 
     public User(int id, String email, String login, String name, LocalDate birthday) {
         this.id = id;
@@ -27,6 +30,7 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
+        friends = new HashSet<>();
     }
 
     @Override
@@ -34,9 +38,14 @@ public class User {
         if (this == o) return true;
         if (!(o instanceof User)) return false;
         User user = (User) o;
-        return getEmail().equals(user.getEmail())
-                && Objects.equals(getLogin(), user.getLogin())
-                && getName().equals(user.getName())
-                && getBirthday().equals(user.getBirthday());
+        return getId() == user.getId();
+    }
+
+    public void addFriend(int id) {
+        friends.add(id);
+    }
+
+    public void deleteFriend(int id) {
+        friends.remove(id);
     }
 }

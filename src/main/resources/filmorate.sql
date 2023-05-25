@@ -18,20 +18,22 @@ create table users (
     login varchar(16) not null,
     name varchar(16) not null,
     birthday date not null,
-    check(birthday <= cast(now() as date))
+    check(birthday <= cast(now() as date)) -- исключаем не родившихся пользователей
 );
 create table likes (
     id serial primary key,
     film_id int references film(id) not null,
     user_id int references users(id) not null,
-    unique(film_id, user_id)
+    unique(film_id, user_id) -- исключаем повторные лайки
 );
 create table friends (
     id serial primary key,
     user_id int references users(id) not null,
     friend_id int references users(id) not null,
-    is_accepted boolean not null,
-    unique(user_id, friend_id)
+    is_accepted boolean default false,  -- true - дружба подтверждена
+                                        -- false - дружба отклонена
+                                        -- по умолчанию дружба не подтверждена
+    unique(user_id, friend_id) -- исключаем повторы
 );
 create table genres (
   id smallserial primary key,
@@ -41,5 +43,5 @@ create table film_genres (
     id smallserial primary key,
     film_id int references film(id) not null,
     genre_id smallint references genre(id) not null,
-    unique(film_id, genre_id)
+    unique(film_id, genre_id) -- исключаем повторы
 );

@@ -1,86 +1,58 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.ValidationException;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/films")
-@Slf4j
+@RequiredArgsConstructor
+@Validated
 public class FilmController {
-    private static final LocalDate FILM_EPOCH = LocalDate.of(1895, 12, 28);
-    private final Map<Integer, Film> films;
-    private int id;
+    private final FilmService filmService;
 
-    public FilmController() {
-        films = new ConcurrentHashMap<>();
-        id = 0;
-    }
-
-    private int setId() {
-        return ++id;
-    }
+    @Autowired
 
     @GetMapping
     public Collection<Film> getFilms() {
-        log.info("Запрошен текущий список фильмов. Всего фильмов: " + films.size());
-        return films.values();
+        return filmService.getFilms();
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable int id) {
+        return filmService.getFilm(id);
     }
 
     @PostMapping
-    public Film createFilm(@RequestBody Film film) throws ValidationException {
-        validateFilm(film);
-        int filmId = setId();
-        film.setId(filmId);
-        films.put(filmId, film);
-        log.info("Создан фильм " + film);
-        return film;
+    public Film createFilm(@Valid @RequestBody Film film) {
+        return filmService.createFilm(film);
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film film) throws ValidationException {
-        checkFilmInBase(film);
-        validateFilm(film);
-        int filmId = film.getId();
-        Film oldFilm = films.get(filmId);
-        films.put(filmId, film);
-        log.info("Фильм " + oldFilm + " изменен на " + film);
-        return film;
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        return filmService.updateFilm(film);
     }
 
-    private void checkFilmInBase(Film film) throws ValidationException {
-        if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Фильм с id " + film.getId() + "не найден.");
-        }
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable int id, @PathVariable int userId) {
+        filmService.addLike(id, userId);
     }
 
-    private void findFilm(Film film) throws ValidationException {
-        for (Film f: films.values()) {
-            if (f.equals(film)) {
-                throw new ValidationException("Такой фильм уже имеется с id " + f.getId());
-            }
-        }
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(@PathVariable int id, @PathVariable int userId) {
+        filmService.deleteLike(id, userId);
     }
 
-    private void validateFilm(Film film) throws ValidationException {
-        if (film.getReleaseDate() == null) {
-            throw new ValidationException("Не задана дата фильма.");
-        } else if (film.getReleaseDate().isBefore(FILM_EPOCH)) {
-            throw new ValidationException("Слишком старая дата фильма.");
-        } else if (StringUtils.isBlank(film.getName())) {
-            throw new ValidationException("Наименование фильма не может быть пустым.");
-        } else if (film.getDuration() < 1) {
-            throw new ValidationException("Продолжительность фильма должна быть положительной.");
-        } else if (film.getDescription().length() > 200) {
-            throw new ValidationException("Максимальная длина описания — 200 символов.");
-        }
-        findFilm(film);
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@Positive @RequestParam(defaultValue = "10") int count) {
+        return filmService.getFilmsByPopularity(count);
     }
-
 }

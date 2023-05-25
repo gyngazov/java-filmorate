@@ -1,26 +1,28 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-public class Film {
-    int id;
+public class Film implements Comparable<Film> {
+    private int id;
     @NotBlank
-    String name;
+    private String name;
     @Size(max = 200)
-    String description;
-    @Past
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    LocalDate releaseDate;
+    @NotNull
+    private String description;
+    @CustomDate
+    private LocalDate releaseDate;
     @Positive
-    int duration;
+    private int duration;
+    private Set<Integer> usersLikes;
 
     public Film(int id, String name, String description, LocalDate releaseDate, int duration) {
         this.id = id;
@@ -28,6 +30,7 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        usersLikes = new HashSet<>();
     }
 
     @Override
@@ -41,4 +44,23 @@ public class Film {
                 && getName().equals(film.getName());
     }
 
+    /**
+     * Сорт по убыванию.
+     */
+    @Override
+    public int compareTo(Film film) {
+        return Integer.compare(film.getUsersLikes().size(), usersLikes.size());
+    }
+
+    public void deleteLike(int id) {
+        if (!usersLikes.remove(id)) {
+            throw new ObjectNotFoundException("Пользователь " + id + " не лайкал фильм " + getId());
+        }
+    }
+
+    public void addLike(int id) {
+        if (!usersLikes.add(id)) {
+            throw new ObjectNotFoundException("Пользователь " + id + " уже лайкал фильм " + getId());
+        }
+    }
 }
