@@ -18,3 +18,4 @@ where f1.user_id=7
 and f1.is_accepted=true
 and f2.is_accepted=true
 and f2.user_id=17
+
