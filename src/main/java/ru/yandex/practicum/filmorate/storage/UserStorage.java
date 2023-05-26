@@ -5,7 +5,6 @@ import ru.yandex.practicum.filmorate.model.Relation;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
-import java.util.Set;
 
 public interface UserStorage {
     int setId();
@@ -18,7 +17,7 @@ public interface UserStorage {
 
     User getUser(int id) throws ObjectNotFoundException;
 
-    Set<Integer> getFriends(int userId);
+    Collection<User> getFriends(int userId);
 
     Collection<User> getUsers();
 
@@ -29,4 +28,6 @@ public interface UserStorage {
     void addFriend(int userId1, int userId2) throws ObjectNotFoundException;
 
     int acceptFriendship(int userId1, int userId2);
+
+    boolean isExisting(String table, int id);
 }

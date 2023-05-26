@@ -48,7 +48,11 @@ public class UserService {
         if (user == null) {
             throw new ObjectNotFoundException("Пользователь " + id + " не найден.");
         }
-        user.setFriends(userStorage.getFriends(id));
+        user.setFriends(userStorage
+                .getFriends(id)
+                .stream()
+                .map(User::getId)
+                .collect(Collectors.toSet()));
         return user;
     }
 
@@ -101,20 +105,12 @@ public class UserService {
         friends.get(userId).add(friendId);
     }
 
-    public void deleteUser(int id) {
-        if (userStorage.deleteUser(getUser(id)) == 0) {
-            throw new ObjectNotFoundException("Пользователь " + id + " не найден для удаления.");
-        } else {
-            log.info("Пользователь с id {} удален.", id);
-        }
-    }
-
     public void addFriend(int userId1, int userId2) {
         if (userId1 == userId2) {
             throw new ValidationException("Нельзя добавить себя в друзья.");
-        } else if (getUser(userId1) == null) {
+        } else if (!userStorage.isExisting("users", userId1)) {
             throw new ObjectNotFoundException("Пользователь " + userId1 + " не найден.");
-        } else if (getUser(userId2) == null) {
+        } else if (!userStorage.isExisting("users", userId2)) {
             throw new ObjectNotFoundException("Пользователь " + userId2 + " не найден.");
         }
         userStorage.addFriend(userId1, userId2);
@@ -122,11 +118,7 @@ public class UserService {
     }
 
     public List<User> getFriends(int id) {
-        return userStorage
-                .getFriends(id)
-                .stream()
-                .map(this::getUser)
-                .collect(Collectors.toList());
+        return new ArrayList<>(userStorage.getFriends(id));
     }
 
     public void deleteFriend(int userId1, int userId2) {

@@ -10,9 +10,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -33,12 +31,12 @@ public class DbUserStorage implements UserStorage {
                 user.getName(),
                 user.getBirthday()
         );
-        user.setId(getLastId("users"));
+        user.setId(getLastId());
         return user;
     }
 
-    private int getLastId(String table) {
-        String lastId = "select max(id) from " + table;
+    private int getLastId() {
+        String lastId = "select max(id) from users";
         SqlRowSet rs = jdbcTemplate.queryForRowSet(lastId);
         return rs.next() ? rs.getInt(1) : 0;
     }
@@ -87,21 +85,17 @@ public class DbUserStorage implements UserStorage {
      * Сбор int-ов друзей юзера.
      */
     @Override
-    public Set<Integer> getFriends(int userId) {
-        Set<Integer> friends = new HashSet<>();
+    public Collection<User> getFriends(int userId) {
         String getFriends =
-                // мои друзья - это и подтвержденные и не подтвержденные
-                "select friend_id from friends "
+                "select * from users where id in "
+                        // мои друзья - это и подтвержденные и не подтвержденные
+                        + "(select friend_id from friends "
                         + "where user_id=? "
                         + "union "
                         // учесть тех, кому я подтвердил дружбу
                         + "select user_id from friends "
-                        + "where friend_id=? and is_accepted=true";
-        SqlRowSet srs = jdbcTemplate.queryForRowSet(getFriends, userId, userId);
-        while (srs.next()) {
-            friends.add(srs.getInt(1));
-        }
-        return friends;
+                        + "where friend_id=? and is_accepted=true)";
+        return jdbcTemplate.query(getFriends, (rs, rowNum) -> makeUser(rs), userId, userId);
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
@@ -159,6 +153,13 @@ public class DbUserStorage implements UserStorage {
     private void clearLikes(int userId) {
         String deleteLikes = "delete from likes where user_id=?";
         jdbcTemplate.update(deleteLikes, userId);
+    }
+
+    public boolean isExisting(String table, int id) {
+        String find = "select (exists (select 1 from " + table + " where id=?))";
+        SqlRowSet srs = jdbcTemplate.queryForRowSet(find, id);
+        srs.next();
+        return srs.getBoolean(1);
     }
 
 }

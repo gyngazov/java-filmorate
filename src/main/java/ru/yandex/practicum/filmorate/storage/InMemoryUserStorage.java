@@ -98,8 +98,12 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Set<Integer> getFriends(int userId) {
+    public Set<User> getFriends(int userId) {
         return null;
     }
 
+    @Override
+    public boolean isExisting(String table, int id) {
+        return false;
+    }
 }

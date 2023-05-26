@@ -39,4 +39,5 @@ public interface FilmStorage {
     Collection<Mpa> getMpas();
 
     Mpa getMpa(int id) throws SQLException;
+
 }

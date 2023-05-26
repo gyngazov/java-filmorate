@@ -59,9 +59,9 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        if (filmStorage.getFilm(filmId) == null) {
+        if (!userStorage.isExisting("films", filmId)) {
             throw new ObjectNotFoundException("Фильм с " + filmId + " не найден.");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (!userStorage.isExisting("users", userId)) {
             throw new ObjectNotFoundException("Пользователь с " + userId + " не найден.");
         } else {
             filmStorage.addLike(filmId, userId);
@@ -69,9 +69,9 @@ public class FilmService {
     }
 
     public void deleteLike(int filmId, int userId) {
-        if (filmStorage.getFilm(filmId) == null) {
+        if (!userStorage.isExisting("films", filmId)) {
             throw new ObjectNotFoundException("Фильм с " + filmId + " не найден.");
-        } else if (userStorage.getUser(userId) == null) {
+        } else if (!userStorage.isExisting("users", userId)) {
             throw new ObjectNotFoundException("Пользователь с " + userId + " не найден.");
         } else {
             filmStorage.deleteLike(filmId, userId);
@@ -90,10 +90,10 @@ public class FilmService {
         return genre;
     }
 
-    public void addFilmGenre(int filmId, int genreId) throws SQLException {
-        if (filmStorage.getFilm(filmId) == null) {
+    public void addFilmGenre(int filmId, int genreId) {
+        if (!userStorage.isExisting("films", filmId)) {
             throw new ObjectNotFoundException("Фильм с id " + filmId + " не найден.");
-        } else if (filmStorage.getGenre(genreId) == null) {
+        } else if (!userStorage.isExisting("genres", genreId)) {
             throw new ObjectNotFoundException("Жанр с id " + genreId + " не найден.");
         } else {
             filmStorage.addFilmGenre(filmId, genreId);
@@ -117,10 +117,10 @@ public class FilmService {
         return filmStorage.getMpas();
     }
 
-    public void deleteFilmGenre(int filmId, int genreId) throws SQLException {
-        if (filmStorage.getFilm(filmId) == null) {
+    public void deleteFilmGenre(int filmId, int genreId) {
+        if (!userStorage.isExisting("films", filmId)) {
             throw new ObjectNotFoundException("Фильм с id " + filmId + " не найден.");
-        } else if (filmStorage.getGenre(genreId) == null) {
+        } else if (!userStorage.isExisting("genres", genreId)) {
             throw new ObjectNotFoundException("Жанр с id " + genreId + " не найден.");
         } else {
             filmStorage.deleteFilmGenre(filmId, genreId);
