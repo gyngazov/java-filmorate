@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
@@ -54,5 +55,15 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> getPopularFilms(@Positive @RequestParam(defaultValue = "10") int count) {
         return filmService.getFilmsByPopularity(count);
+    }
+
+    @PutMapping("/{id}/genre/{genreId}")
+    public void addFilmGenre(@PathVariable int id, @PathVariable int genreId) throws SQLException {
+        filmService.addFilmGenre(id, genreId);
+    }
+
+    @DeleteMapping("/{id}/genre/{genreId}")
+    public void deleteFilmGenre(@PathVariable int id, @PathVariable int genreId) throws SQLException {
+        filmService.deleteFilmGenre(id, genreId);
     }
 }
